@@ -15,8 +15,9 @@ export const jobSchema = z.object({
 
 export const referralSchema = z.object({
     candidateId: z.string().min(1),
-    jobId: z.number().int().positive(),
+    jobId: z.string().min(1),
     note: z.string().max(500).optional(),
+    message: z.string().max(500).optional(),
 });
 
 export const referralStatusSchema = z.object({
@@ -37,6 +38,6 @@ export const paymentVerifySchema = z.object({
     amount: z.number().positive(),
     type: z.enum(['job_posting', 'mock_interview', 'premium', 'referral_reward']),
     transaction_id: z.string().min(1),
-    referral_id: z.number().optional(),
+    referral_id: z.string().optional(),
     engineer_id: z.string().optional(),
 });

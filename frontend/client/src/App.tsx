@@ -1,16 +1,17 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth, RoleRoute } from './context/AuthContext';
-import Landing  from './pages/Landing';
-import Login    from './pages/auth/Login';
+import Landing from './pages/Landing';
+import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import CandidateDashboard from './pages/candidate/dashboard';
-import BrowseJobs         from './pages/candidate/BrowseJobs';
-import MyReferrals        from './pages/candidate/MyReferrals';
+import BrowseJobs from './pages/candidate/BrowseJobs';
+import MyReferrals from './pages/candidate/MyReferrals';
+import ProfileSetup from './pages/candidate/ProfileSetup';
 import EngineerDashboard from './pages/engineer/Dashboard';
-import CandidateList     from './pages/engineer/CandidateList';
-import Earnings          from './pages/engineer/Earnings';
+import CandidateList from './pages/engineer/CandidateList';
+import Earnings from './pages/engineer/Earnings';
 import CompanyDashboard from './pages/company/Dashboard';
-import PostJob          from './pages/company/PostJob';
+import PostJob from './pages/company/PostJob';
 
 function RootRedirect() {
   const { isAuthenticated, getDashboardPath, loading } = useAuth();
@@ -21,17 +22,18 @@ function RootRedirect() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/"         element={<RootRedirect />} />
-      <Route path="/login"    element={<Login />} />
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/candidate/dashboard"  element={<RoleRoute roles={['candidate']}><CandidateDashboard /></RoleRoute>} />
-      <Route path="/candidate/jobs"       element={<RoleRoute roles={['candidate']}><BrowseJobs /></RoleRoute>} />
-      <Route path="/candidate/referrals"  element={<RoleRoute roles={['candidate']}><MyReferrals /></RoleRoute>} />
-      <Route path="/engineer/dashboard"   element={<RoleRoute roles={['engineer']}><EngineerDashboard /></RoleRoute>} />
-      <Route path="/engineer/candidates"  element={<RoleRoute roles={['engineer']}><CandidateList /></RoleRoute>} />
-      <Route path="/engineer/earnings"    element={<RoleRoute roles={['engineer']}><Earnings /></RoleRoute>} />
-      <Route path="/company/dashboard"    element={<RoleRoute roles={['company']}><CompanyDashboard /></RoleRoute>} />
-      <Route path="/company/post-job"     element={<RoleRoute roles={['company']}><PostJob /></RoleRoute>} />
+      <Route path="/candidate/dashboard" element={<RoleRoute roles={['candidate']}><CandidateDashboard /></RoleRoute>} />
+      <Route path="/candidate/jobs" element={<RoleRoute roles={['candidate']}><BrowseJobs /></RoleRoute>} />
+      <Route path="/candidate/referrals" element={<RoleRoute roles={['candidate']}><MyReferrals /></RoleRoute>} />
+      <Route path="/candidate/profile-setup" element={<RoleRoute roles={['candidate']}><ProfileSetup /></RoleRoute>} />
+      <Route path="/engineer/dashboard" element={<RoleRoute roles={['engineer']}><EngineerDashboard /></RoleRoute>} />
+      <Route path="/engineer/candidates" element={<RoleRoute roles={['engineer']}><CandidateList /></RoleRoute>} />
+      <Route path="/engineer/earnings" element={<RoleRoute roles={['engineer']}><Earnings /></RoleRoute>} />
+      <Route path="/company/dashboard" element={<RoleRoute roles={['company']}><CompanyDashboard /></RoleRoute>} />
+      <Route path="/company/post-job" element={<RoleRoute roles={['company']}><PostJob /></RoleRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

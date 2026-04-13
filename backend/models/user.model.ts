@@ -1,10 +1,10 @@
 import { query } from '../config/db.js';
 
-export const findByFirebaseUid = (uid: string) =>
-    query('SELECT * FROM users WHERE firebase_uid = $1', [uid]);
+export const findUserById = (id: string) =>
+    query('SELECT * FROM users WHERE id = $1 AND is_deleted = false', [id]);
 
-export const createUser = (uid: string, email: string, role: string, name: string) =>
+export const createUser = (email: string, password: string, role: string, name: string) =>
     query(
-        'INSERT INTO users (firebase_uid, email, role, name) VALUES ($1, $2, $3, $4) RETURNING *',
-        [uid, email, role, name]
+        'INSERT INTO users (email, password, role, name) VALUES ($1, $2, $3, $4) RETURNING *',
+        [email, password, role, name]
     );

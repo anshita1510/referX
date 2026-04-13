@@ -1,12 +1,14 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
-    const { login, loginWithGoogle, error, clearError } = useAuth();
+    const { login, error, clearError } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPw, setShowPw] = useState(false);
     const [busy, setBusy] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
@@ -18,149 +20,83 @@ export default function Login() {
         if (result.success) navigate('/');
     };
 
-    const handleGoogle = async () => {
-        clearError();
-        setBusy(true);
-        const result = await loginWithGoogle(null);
-        setBusy(false);
-        if (result.success) navigate('/');
-    };
-
     return (
-        <div style={styles.page}>
-            <div style={styles.card}>
-                <div style={styles.logo}>ReferX</div>
-                <h2 style={styles.title}>Welcome back</h2>
-                <p style={styles.subtitle}>Sign in to your account</p>
+        <div className="auth-page items-center justify-center px-4 py-12">
+            {/* Left decorative panel */}
+            <div className="hidden lg:flex flex-col justify-between w-[420px] flex-shrink-0 rounded-3xl p-10 mr-10"
+                style={{ background: 'linear-gradient(145deg, var(--color-brand-dark), var(--color-brand), var(--color-teal-light))', minHeight: 520 }}>
+                <div className="flex items-center gap-3">
+                    <img src="/logo.png" alt="ReferX" className="h-9 w-9 rounded-full object-cover" style={{ objectPosition: '50% 35%' }} />
+                    <span className="font-heading text-xl font-extrabold text-white">ReferX</span>
+                </div>
+                <div>
+                    <h2 className="font-heading text-3xl font-extrabold text-white mb-4 leading-snug">
+                        Your next job starts with a real referral.
+                    </h2>
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                        Engineers refer. Candidates get hired. Companies find quality talent — all in one place.
+                    </p>
+                </div>
+                <div className="flex flex-col gap-3">
+                    {[
+                        { stat: '12,000+', label: 'Candidates registered' },
+                        { stat: '3,400+', label: 'Successful referrals' },
+                        { stat: '₹42L+', label: 'Paid to engineers' },
+                    ].map(s => (
+                        <div key={s.label} className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                            style={{ background: 'rgba(255,255,255,0.12)' }}>
+                            <span className="font-heading font-extrabold text-white text-lg">{s.stat}</span>
+                            <span className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{s.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-                {error && <div style={styles.errorBox}>{error}</div>}
+            {/* Card */}
+            <div className="auth-card w-full max-w-md p-10">
+                <div className="flex items-center gap-2 mb-8 lg:hidden">
+                    <img src="/logo.png" alt="ReferX" className="h-8 w-8 rounded-full object-cover" style={{ objectPosition: '50% 35%' }} />
+                    <span className="font-heading text-xl font-extrabold" style={{ color: 'var(--color-text-primary)' }}>
+                        Refer<span style={{ color: 'var(--color-brand)' }}>X</span>
+                    </span>
+                </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div style={styles.field}>
-                        <label style={styles.label}>Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                            placeholder="you@example.com"
-                            style={styles.input}
-                        />
+                <h2 className="font-heading text-2xl font-extrabold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                    Welcome back
+                </h2>
+                <p className="text-sm mb-8" style={{ color: 'var(--color-text-muted)' }}>Sign in to your account</p>
+
+                {error && <div className="auth-error">{error}</div>}
+
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div>
+                        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-primary)' }}>Email</label>
+                        <input className="auth-input" type="email" value={email}
+                            onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
                     </div>
-                    <div style={styles.field}>
-                        <label style={styles.label}>Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                            placeholder="••••••••"
-                            style={styles.input}
-                        />
+                    <div>
+                        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-primary)' }}>Password</label>
+                        <div className="relative">
+                            <input className="auth-input pr-10" type={showPw ? 'text' : 'password'}
+                                value={password} onChange={e => setPassword(e.target.value)}
+                                required placeholder="••••••••" />
+                            <button type="button" onClick={() => setShowPw(v => !v)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2"
+                                style={{ color: 'var(--color-text-soft)' }}>
+                                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" disabled={busy} style={styles.primaryBtn}>
+                    <button type="submit" disabled={busy} className="auth-btn mt-1">
                         {busy ? 'Signing in…' : 'Sign in'}
                     </button>
                 </form>
 
-                <div style={styles.divider}><span>or</span></div>
-
-                <button onClick={handleGoogle} disabled={busy} style={styles.googleBtn}>
-                    <svg width="18" height="18" viewBox="0 0 48 48" style={{ marginRight: 8 }}>
-                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
-                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-                    </svg>
-                    Continue with Google
-                </button>
-
-                <p style={styles.footer}>
-                    No account? <Link to="/register" style={styles.link}>Register</Link>
+                <p className="text-center mt-6 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    No account?{' '}
+                    <Link to="/register" className="font-semibold" style={{ color: 'var(--color-brand)' }}>Register</Link>
                 </p>
             </div>
         </div>
     );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-    page: {
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#f9fafb',
-        fontFamily: 'system-ui, sans-serif',
-    },
-    card: {
-        background: '#fff',
-        borderRadius: 12,
-        padding: '40px 36px',
-        width: '100%',
-        maxWidth: 400,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.06)',
-    },
-    logo: {
-        fontSize: 22,
-        fontWeight: 700,
-        color: '#3b82f6',
-        marginBottom: 20,
-    },
-    title: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#111' },
-    subtitle: { margin: '0 0 24px', color: '#6b7280', fontSize: 14 },
-    errorBox: {
-        background: '#fef2f2',
-        border: '1px solid #fecaca',
-        color: '#dc2626',
-        borderRadius: 6,
-        padding: '10px 14px',
-        fontSize: 14,
-        marginBottom: 16,
-    },
-    field: { marginBottom: 16 },
-    label: { display: 'block', fontSize: 14, fontWeight: 500, color: '#374151', marginBottom: 6 },
-    input: {
-        display: 'block',
-        width: '100%',
-        padding: '10px 12px',
-        border: '1px solid #d1d5db',
-        borderRadius: 6,
-        fontSize: 14,
-        outline: 'none',
-        boxSizing: 'border-box',
-    },
-    primaryBtn: {
-        width: '100%',
-        padding: '11px 0',
-        background: '#3b82f6',
-        color: '#fff',
-        border: 'none',
-        borderRadius: 6,
-        fontSize: 15,
-        fontWeight: 600,
-        cursor: 'pointer',
-        marginTop: 4,
-    },
-    divider: {
-        textAlign: 'center',
-        margin: '20px 0',
-        color: '#9ca3af',
-        fontSize: 13,
-        position: 'relative',
-    },
-    googleBtn: {
-        width: '100%',
-        padding: '10px 0',
-        background: '#fff',
-        border: '1px solid #d1d5db',
-        borderRadius: 6,
-        fontSize: 14,
-        fontWeight: 500,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    footer: { textAlign: 'center', marginTop: 20, fontSize: 14, color: '#6b7280' },
-    link: { color: '#3b82f6', textDecoration: 'none', fontWeight: 500 },
-};

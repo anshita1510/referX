@@ -3,7 +3,7 @@ import { query } from '../config/db.js';
 
 export const uploadDocuments = async (req: Request, res: Response) => {
     try {
-        const candidateId = (req as any).user?.uid;
+        const candidateId = (req as any).user?.id;
         const { referral_id } = req.body;
         const files = (req as any).files as Record<string, { path: string }[]>;
 
@@ -30,14 +30,14 @@ export const uploadDocuments = async (req: Request, res: Response) => {
 
 export const getDocuments = async (req: Request, res: Response) => {
     try {
-        const uid = (req as any).user?.uid;
+        const uid = (req as any).user?.id;
         const role = (req as any).user?.role;
         const col = role === 'admin' ? '1=1' : 'candidate_id = $1';
 
         const result = await query(
             `SELECT d.*, u.name AS candidate_name
        FROM documents d
-       LEFT JOIN users u ON u.firebase_uid = d.candidate_id
+       LEFT JOIN users u ON u.id = d.candidate_id
        WHERE ${col}
        ORDER BY d.uploaded_at DESC`,
             role === 'admin' ? [] : [uid]

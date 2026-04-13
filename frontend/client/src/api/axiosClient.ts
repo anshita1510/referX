@@ -1,17 +1,13 @@
 import axios from 'axios';
-import { getAuth } from 'firebase/auth';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     timeout: 10000,
 });
 
-api.interceptors.request.use(async (config) => {
-    const user = getAuth().currentUser;
-    if (user) {
-        const token = await user.getIdToken();
-        config.headers.Authorization = `Bearer ${token}`;
-    }
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });
 
@@ -19,7 +15,8 @@ api.interceptors.response.use(
     (res) => res,
     (err) => {
         if (err.response?.status === 401) {
-            getAuth().signOut();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             window.location.replace('/login');
         }
         return Promise.reject(err);

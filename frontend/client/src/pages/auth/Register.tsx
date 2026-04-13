@@ -1,14 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-
-type Role = 'candidate' | 'engineer' | 'company';
-
-const ROLES: { value: Role; label: string; desc: string }[] = [
-    { value: 'candidate', label: 'Candidate', desc: 'Looking for a job via referrals' },
-    { value: 'engineer', label: 'Engineer', desc: 'Refer candidates and earn rewards' },
-    { value: 'company', label: 'Company / Recruiter', desc: 'Post jobs and hire talent' },
-];
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
     const { register, error, clearError } = useAuth();
@@ -16,166 +9,118 @@ export default function Register() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
-    const [role, setRole] = useState<Role>('candidate');
+    const [showPw, setShowPw] = useState(false);
     const [busy, setBusy] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         clearError();
         setBusy(true);
-        const result = await register(email, password, role, { name });
+        const result = await register(email, password, 'candidate', { name });
         setBusy(false);
-        if (result.success) navigate('/');
+        if (result.success) navigate('/candidate/profile-setup');
     };
 
     return (
-        <div style={styles.page}>
-            <div style={styles.card}>
-                <div style={styles.logo}>ReferX</div>
-                <h2 style={styles.title}>Create your account</h2>
-                <p style={styles.subtitle}>Join the referral network</p>
+        <div className="auth-page items-center justify-center px-4 py-12">
+            {/* Left panel */}
+            <div className="hidden lg:flex flex-col justify-between w-[380px] flex-shrink-0 rounded-3xl p-10 mr-10"
+                style={{ background: 'linear-gradient(145deg, var(--color-brand-dark), var(--color-brand), var(--color-teal-light))', minHeight: 520 }}>
+                <div className="flex items-center gap-3">
+                    <img src="/logo.png" alt="ReferX" className="h-9 w-9 rounded-full object-cover" style={{ objectPosition: '50% 35%' }} />
+                    <span className="font-heading text-xl font-extrabold text-white">ReferX</span>
+                </div>
+                <div>
+                    <h2 className="font-heading text-3xl font-extrabold text-white mb-4 leading-snug">
+                        Your first job starts with a real referral.
+                    </h2>
+                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                        Create your account, complete your profile, and get referred by engineers at top companies.
+                    </p>
+                </div>
+                <div className="flex flex-col gap-3">
+                    {[
+                        { step: '1', label: 'Create your account' },
+                        { step: '2', label: 'Complete your profile' },
+                        { step: '3', label: 'Get referred & hired' },
+                    ].map(s => (
+                        <div key={s.step} className="flex items-center gap-3 px-4 py-3 rounded-xl"
+                            style={{ background: 'rgba(255,255,255,0.12)' }}>
+                            <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                                style={{ background: 'rgba(255,255,255,0.25)', color: '#fff' }}>{s.step}</span>
+                            <span className="text-sm text-white">{s.label}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-                {error && <div style={styles.errorBox}>{error}</div>}
+            {/* Card */}
+            <div className="auth-card w-full max-w-md p-10">
+                <div className="flex items-center gap-2 mb-8 lg:hidden">
+                    <img src="/logo.png" alt="ReferX" className="h-8 w-8 rounded-full object-cover" style={{ objectPosition: '50% 35%' }} />
+                    <span className="font-heading text-xl font-extrabold" style={{ color: 'var(--color-text-primary)' }}>
+                        Refer<span style={{ color: 'var(--color-brand)' }}>X</span>
+                    </span>
+                </div>
 
-                <form onSubmit={handleSubmit}>
-                    <div style={styles.field}>
-                        <label style={styles.label}>Full Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                            required
-                            placeholder="Jane Smith"
-                            style={styles.input}
-                        />
-                    </div>
-                    <div style={styles.field}>
-                        <label style={styles.label}>Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            required
-                            placeholder="you@example.com"
-                            style={styles.input}
-                        />
-                    </div>
-                    <div style={styles.field}>
-                        <label style={styles.label}>Password</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            required
-                            placeholder="Min. 6 characters"
-                            style={styles.input}
-                        />
-                    </div>
+                <h2 className="font-heading text-2xl font-extrabold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                    Create your account
+                </h2>
+                <p className="text-sm mb-8" style={{ color: 'var(--color-text-muted)' }}>
+                    Step 1 of 2 — Basic info
+                </p>
 
-                    <div style={styles.field}>
-                        <label style={styles.label}>I am a…</label>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-                            {ROLES.map(r => (
-                                <label key={r.value} style={{
-                                    ...styles.roleOption,
-                                    ...(role === r.value ? styles.roleOptionActive : {}),
-                                }}>
-                                    <input
-                                        type="radio"
-                                        name="role"
-                                        value={r.value}
-                                        checked={role === r.value}
-                                        onChange={() => setRole(r.value)}
-                                        style={{ marginRight: 10 }}
-                                    />
-                                    <div>
-                                        <div style={{ fontWeight: 600, fontSize: 14 }}>{r.label}</div>
-                                        <div style={{ fontSize: 12, color: '#6b7280' }}>{r.desc}</div>
-                                    </div>
-                                </label>
-                            ))}
+                {/* Role badge */}
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl mb-6"
+                    style={{ background: 'var(--color-sky)', border: '1px solid var(--color-border)' }}>
+                    <span className="text-lg">🎯</span>
+                    <div>
+                        <div className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Registering as Candidate</div>
+                        <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Looking for a job via referrals</div>
+                    </div>
+                </div>
+
+                {error && <div className="auth-error">{error}</div>}
+
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                    <div>
+                        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-primary)' }}>Full Name</label>
+                        <input className="auth-input" type="text" value={name}
+                            onChange={e => setName(e.target.value)} required placeholder="Jane Smith" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-primary)' }}>Email</label>
+                        <input className="auth-input" type="email" value={email}
+                            onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--color-text-primary)' }}>Password</label>
+                        <div className="relative">
+                            <input className="auth-input pr-10" type={showPw ? 'text' : 'password'}
+                                value={password} onChange={e => setPassword(e.target.value)}
+                                required placeholder="Min. 6 characters" />
+                            <button type="button" onClick={() => setShowPw(v => !v)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2"
+                                style={{ color: 'var(--color-text-soft)' }}>
+                                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
                         </div>
                     </div>
 
-                    <button type="submit" disabled={busy} style={styles.primaryBtn}>
-                        {busy ? 'Creating account…' : 'Create account'}
+                    <button type="submit" disabled={busy} className="auth-btn mt-1">
+                        {busy ? 'Creating account…' : 'Continue →'}
                     </button>
                 </form>
 
-                <p style={styles.footer}>
-                    Already have an account? <Link to="/login" style={styles.link}>Sign in</Link>
+                <p className="text-center mt-6 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                    Already have an account?{' '}
+                    <Link to="/login" className="font-semibold" style={{ color: 'var(--color-brand)' }}>Sign in</Link>
+                </p>
+                <p className="text-center mt-3 text-xs" style={{ color: 'var(--color-text-soft)' }}>
+                    Engineer or Company?{' '}
+                    <Link to="/login" className="underline" style={{ color: 'var(--color-brand)' }}>Contact us to join</Link>
                 </p>
             </div>
         </div>
     );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-    page: {
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: '#f9fafb',
-        fontFamily: 'system-ui, sans-serif',
-        padding: '24px 0',
-    },
-    card: {
-        background: '#fff',
-        borderRadius: 12,
-        padding: '40px 36px',
-        width: '100%',
-        maxWidth: 440,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 4px 16px rgba(0,0,0,0.06)',
-    },
-    logo: { fontSize: 22, fontWeight: 700, color: '#3b82f6', marginBottom: 20 },
-    title: { margin: '0 0 4px', fontSize: 22, fontWeight: 700, color: '#111' },
-    subtitle: { margin: '0 0 24px', color: '#6b7280', fontSize: 14 },
-    errorBox: {
-        background: '#fef2f2',
-        border: '1px solid #fecaca',
-        color: '#dc2626',
-        borderRadius: 6,
-        padding: '10px 14px',
-        fontSize: 14,
-        marginBottom: 16,
-    },
-    field: { marginBottom: 16 },
-    label: { display: 'block', fontSize: 14, fontWeight: 500, color: '#374151', marginBottom: 6 },
-    input: {
-        display: 'block',
-        width: '100%',
-        padding: '10px 12px',
-        border: '1px solid #d1d5db',
-        borderRadius: 6,
-        fontSize: 14,
-        outline: 'none',
-        boxSizing: 'border-box',
-    },
-    roleOption: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '10px 12px',
-        border: '1px solid #e5e7eb',
-        borderRadius: 8,
-        cursor: 'pointer',
-    },
-    roleOptionActive: {
-        border: '2px solid #3b82f6',
-        background: '#eff6ff',
-    },
-    primaryBtn: {
-        width: '100%',
-        padding: '11px 0',
-        background: '#3b82f6',
-        color: '#fff',
-        border: 'none',
-        borderRadius: 6,
-        fontSize: 15,
-        fontWeight: 600,
-        cursor: 'pointer',
-        marginTop: 8,
-    },
-    footer: { textAlign: 'center', marginTop: 20, fontSize: 14, color: '#6b7280' },
-    link: { color: '#3b82f6', textDecoration: 'none', fontWeight: 500 },
-};

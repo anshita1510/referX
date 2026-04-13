@@ -6,12 +6,22 @@
 
 @layer base {
     :root {
-        --color-surface: #FBFBFB;
-        --color-sky: #E8F9FF;
-        --color-periwinkle: #C4D9FF;
+        --color-surface: #FFFFFF;
+        --color-sky: #CFE5E6;
+        --color-periwinkle: #A4D0D2;
         --color-lavender: #C5BAFF;
-        --color-brand: #8B7FD4;
-        --color-brand-dark: #6C5FBF;
+        --color-brand: #149AA0;
+        --color-brand-dark: #02868C;
+        --color-teal-light: #79C5C8;
+        --color-teal-mid: #67BABE;
+        --color-text-primary: #1a1a2e;
+        --color-text-muted: #6b7280;
+        --color-text-soft: #9ca3af;
+        --color-border: #A4D0D2;
+        --color-border-light: #CFE5E6;
+        --color-error-bg: #fef2f2;
+        --color-error-border: #fecaca;
+        --color-error-text: #dc2626;
     }
 
     html {
@@ -21,7 +31,7 @@
     body {
         font-family: 'DM Sans', sans-serif;
         background: var(--color-surface);
-        color: #1a1a2e;
+        color: var(--color-text-primary);
     }
 
     h1,
@@ -38,28 +48,32 @@
     }
 
     .btn-hero {
-        @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base text-white transition-all duration-200 active:scale-95 shadow-lg;
-        background: linear-gradient(135deg, #8B7FD4, #C5BAFF);
-        box-shadow: 0 8px 24px rgba(139, 127, 212, 0.35);
+        @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-base text-white active:scale-95;
+        background-image: linear-gradient(to right, var(--color-brand-dark) 0%, var(--color-teal-light) 51%, var(--color-brand-dark) 100%);
+        background-size: 200% auto;
+        box-shadow: 0 0 20px rgba(20, 154, 160, 0.3);
+        border: none;
+        outline: none;
+        transition: background-position 0.5s ease, box-shadow 0.3s ease;
     }
 
     .btn-hero:hover {
-        background: linear-gradient(135deg, #6C5FBF, #8B7FD4);
-        box-shadow: 0 12px 28px rgba(139, 127, 212, 0.45);
+        background-position: right center;
+        box-shadow: 0 0 28px rgba(20, 154, 160, 0.45);
     }
 
     .btn-hero-outline {
         @apply inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl border-2 font-semibold text-base transition-all duration-200 active:scale-95;
-        border-color: #8B7FD4;
-        color: #6C5FBF;
+        border-color: var(--color-brand);
+        color: var(--color-brand-dark);
     }
 
     .btn-hero-outline:hover {
-        background: #E8F9FF;
+        background: var(--color-sky);
     }
 
     .gradient-text {
-        background: linear-gradient(135deg, #8B7FD4 0%, #C5BAFF 60%, #C4D9FF 100%);
+        background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-teal-mid) 60%, var(--color-periwinkle) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -67,11 +81,127 @@
 
     .section-title {
         @apply font-heading text-3xl md:text-4xl font-bold text-center;
-        color: #1a1a2e;
+        color: var(--color-text-primary);
     }
 
     .section-sub {
         @apply text-center text-lg mt-3 max-w-xl mx-auto;
-        color: #6b7280;
+        color: var(--color-text-muted);
+    }
+
+    /* ── Auth pages ── */
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-sky) 50%, var(--color-periwinkle) 100%);
+    }
+
+    .auth-card {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border-light);
+        border-radius: 20px;
+        box-shadow: 0 8px 40px rgba(20, 154, 160, 0.12);
+    }
+
+    .auth-input {
+        display: block;
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid var(--color-border-light);
+        border-radius: 10px;
+        font-size: 14px;
+        outline: none;
+        box-sizing: border-box;
+        font-family: 'DM Sans', sans-serif;
+        color: var(--color-text-primary);
+        background: var(--color-surface);
+        transition: border-color 0.2s;
+    }
+
+    .auth-input:focus {
+        border-color: var(--color-brand);
+    }
+
+    .auth-input::placeholder {
+        color: var(--color-text-soft);
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 12px 0;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        color: #fff;
+        background-image: linear-gradient(to right, var(--color-brand-dark) 0%, var(--color-teal-light) 51%, var(--color-brand-dark) 100%);
+        background-size: 200% auto;
+        box-shadow: 0 0 20px rgba(20, 154, 160, 0.25);
+        transition: background-position 0.5s ease, opacity 0.2s;
+    }
+
+    .auth-btn:hover {
+        background-position: right center;
+    }
+
+    .auth-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .auth-google-btn {
+        width: 100%;
+        padding: 11px 0;
+        background: var(--color-surface);
+        border: 1.5px solid var(--color-border-light);
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-family: 'DM Sans', sans-serif;
+        color: var(--color-text-primary);
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .auth-google-btn:hover {
+        border-color: var(--color-brand);
+        background: var(--color-sky);
+    }
+
+    .auth-error {
+        background: var(--color-error-bg);
+        border: 1px solid var(--color-error-border);
+        color: var(--color-error-text);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 14px;
+        margin-bottom: 16px;
+    }
+
+    .role-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1.5px solid var(--color-border-light);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .role-option:hover {
+        border-color: var(--color-brand);
+        background: var(--color-sky);
+    }
+
+    .role-option.active {
+        border-color: var(--color-brand);
+        background: var(--color-sky);
     }
 }
