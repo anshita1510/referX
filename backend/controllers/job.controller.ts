@@ -53,6 +53,10 @@ export const applyToJob = async (req: Request, res: Response) => {
         const jobId = parseInt(req.params.id);
         if (isNaN(jobId)) return res.status(400).json({ error: 'Invalid job id' });
 
+        // Verify the candidate user actually exists
+        const user = await prisma.user.findUnique({ where: { id: candidateId } });
+        if (!user) return res.status(401).json({ error: 'User not found. Please log in again.' });
+
         const existing = await prisma.application.findUnique({
             where: { candidate_id_job_id: { candidate_id: candidateId, job_id: jobId } },
         });
