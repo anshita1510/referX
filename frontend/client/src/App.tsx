@@ -7,6 +7,8 @@ import CandidateDashboard from './pages/candidate/dashboard';
 import BrowseJobs from './pages/candidate/BrowseJobs';
 import MyReferrals from './pages/candidate/MyReferrals';
 import ProfileSetup from './pages/candidate/ProfileSetup';
+import Interviews from './pages/candidate/Interviews';
+import Documents from './pages/candidate/Documents';
 import EngineerDashboard from './pages/engineer/Dashboard';
 import CandidateList from './pages/engineer/CandidateList';
 import Earnings from './pages/engineer/Earnings';
@@ -29,6 +31,8 @@ export default function App() {
       <Route path="/candidate/jobs" element={<RoleRoute roles={['candidate']}><BrowseJobs /></RoleRoute>} />
       <Route path="/candidate/referrals" element={<RoleRoute roles={['candidate']}><MyReferrals /></RoleRoute>} />
       <Route path="/candidate/profile-setup" element={<RoleRoute roles={['candidate']}><ProfileSetup /></RoleRoute>} />
+      <Route path="/candidate/interviews" element={<RoleRoute roles={['candidate']}><Interviews /></RoleRoute>} />
+      <Route path="/candidate/documents" element={<RoleRoute roles={['candidate']}><Documents /></RoleRoute>} />
       <Route path="/engineer/dashboard" element={<RoleRoute roles={['engineer']}><EngineerDashboard /></RoleRoute>} />
       <Route path="/engineer/candidates" element={<RoleRoute roles={['engineer']}><CandidateList /></RoleRoute>} />
       <Route path="/engineer/earnings" element={<RoleRoute roles={['engineer']}><Earnings /></RoleRoute>} />

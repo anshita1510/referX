@@ -6,6 +6,8 @@ const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
         { label: 'Dashboard', href: '/candidate/dashboard' },
         { label: 'Browse Jobs', href: '/candidate/jobs' },
         { label: 'My Referrals', href: '/candidate/referrals' },
+        { label: 'Interviews', href: '/candidate/interviews' },
+        { label: 'Documents', href: '/candidate/documents' },
     ],
     engineer: [
         { label: 'Dashboard', href: '/engineer/dashboard' },
@@ -19,110 +21,64 @@ const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
 };
 
 export default function Navbar() {
-    const { isAuthenticated, role, logout, getDashboardPath } = useAuth();
+    const { isAuthenticated, role, logout, getDashboardPath, user } = useAuth();
     const location = useLocation();
     const links = role ? (NAV_LINKS[role] ?? []) : [];
 
     return (
-        <nav style={styles.nav}>
-            <Link to={isAuthenticated ? getDashboardPath() : '/'} style={styles.brand}>
-                Refer<span style={{ color: '#3b82f6' }}>X</span>
+        <nav style={{
+            display: 'flex', alignItems: 'center', padding: '0 24px', height: 56,
+            background: 'var(--color-surface)', borderBottom: '1px solid var(--color-border-light)',
+            position: 'sticky', top: 0, zIndex: 100,
+            boxShadow: '0 1px 8px rgba(20,154,160,0.07)',
+        }}>
+            <Link to={isAuthenticated ? getDashboardPath() : '/'} style={{
+                fontSize: 20, fontWeight: 800, color: 'var(--color-text-primary)',
+                textDecoration: 'none', marginRight: 32, fontFamily: 'Space Grotesk, sans-serif',
+            }}>
+                Refer<span style={{ color: 'var(--color-brand)' }}>X</span>
             </Link>
 
             {isAuthenticated && (
-                <div style={styles.links}>
+                <div style={{ display: 'flex', gap: 2, flex: 1, overflowX: 'auto' }}>
                     {links.map(l => (
-                        <Link
-                            key={l.href}
-                            to={l.href}
-                            style={{
-                                ...styles.link,
-                                ...(location.pathname === l.href ? styles.linkActive : {}),
-                            }}
-                        >
+                        <Link key={l.href} to={l.href} style={{
+                            padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
+                            color: location.pathname === l.href ? 'var(--color-brand-dark)' : 'var(--color-text-muted)',
+                            textDecoration: 'none', whiteSpace: 'nowrap',
+                            background: location.pathname === l.href ? 'var(--color-sky)' : 'transparent',
+                            transition: 'background 0.15s',
+                        }}>
                             {l.label}
                         </Link>
                     ))}
                 </div>
             )}
 
-            <div style={styles.right}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' }}>
                 {isAuthenticated ? (
                     <>
-                        <span style={styles.roleBadge}>{role}</span>
-                        <button onClick={logout} style={styles.logoutBtn}>Log out</button>
+                        <span style={{
+                            fontSize: 12, fontWeight: 600, color: 'var(--color-brand-dark)',
+                            background: 'var(--color-sky)', padding: '3px 10px',
+                            borderRadius: 20, textTransform: 'capitalize',
+                        }}>{user?.name ?? role}</span>
+                        <button onClick={logout} style={{
+                            padding: '6px 14px', border: '1px solid var(--color-border)',
+                            borderRadius: 8, background: 'var(--color-surface)', fontSize: 13,
+                            cursor: 'pointer', color: 'var(--color-text-muted)', fontFamily: 'DM Sans, sans-serif',
+                        }}>Log out</button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login" style={styles.link}>Sign in</Link>
-                        <Link to="/register" style={styles.registerBtn}>Register</Link>
+                        <Link to="/login" style={{ padding: '6px 12px', fontSize: 13, color: 'var(--color-text-muted)', textDecoration: 'none' }}>Sign in</Link>
+                        <Link to="/register" style={{
+                            padding: '7px 16px', background: 'var(--color-brand)', color: '#fff',
+                            borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none',
+                        }}>Register</Link>
                     </>
                 )}
             </div>
         </nav>
     );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-    nav: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: '0 24px',
-        height: 56,
-        background: '#fff',
-        borderBottom: '1px solid #e5e7eb',
-        fontFamily: 'system-ui, sans-serif',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-    },
-    brand: {
-        fontSize: 20,
-        fontWeight: 800,
-        color: '#111',
-        textDecoration: 'none',
-        marginRight: 32,
-        letterSpacing: '-0.5px',
-    },
-    links: { display: 'flex', gap: 4, flex: 1 },
-    link: {
-        padding: '6px 12px',
-        borderRadius: 6,
-        fontSize: 14,
-        fontWeight: 500,
-        color: '#374151',
-        textDecoration: 'none',
-    },
-    linkActive: {
-        background: '#eff6ff',
-        color: '#3b82f6',
-    },
-    right: { display: 'flex', alignItems: 'center', gap: 12, marginLeft: 'auto' },
-    roleBadge: {
-        fontSize: 12,
-        fontWeight: 600,
-        color: '#6b7280',
-        background: '#f3f4f6',
-        padding: '3px 10px',
-        borderRadius: 20,
-        textTransform: 'capitalize',
-    },
-    logoutBtn: {
-        padding: '6px 14px',
-        border: '1px solid #d1d5db',
-        borderRadius: 6,
-        background: '#fff',
-        fontSize: 14,
-        cursor: 'pointer',
-        color: '#374151',
-    },
-    registerBtn: {
-        padding: '6px 14px',
-        background: '#3b82f6',
-        color: '#fff',
-        borderRadius: 6,
-        fontSize: 14,
-        fontWeight: 500,
-        textDecoration: 'none',
-    },
-};

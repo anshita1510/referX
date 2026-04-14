@@ -1,108 +1,137 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/Navbar';
-import ReferralCard from '../../components/ReferralCard';
+import DashNavbar from '../../components/dashboard/DashNavbar';
+import StatsRow from '../../components/dashboard/StatsRow';
+import ProfileBanner from '../../components/dashboard/ProfileBanner';
+import QuickActions from '../../components/dashboard/QuickActions';
+import RecentApplications from '../../components/dashboard/RecentApplications';
+import AnalyticsPanel from '../../components/dashboard/AnalyticsPanel';
+import JobMatchFeed from '../../components/dashboard/JobMatchFeed';
+import ResumeScoreCard from '../../components/dashboard/ResumeScoreCard';
+import GoalTracker from '../../components/dashboard/GoalTracker';
+import ReferralNetwork from '../../components/dashboard/ReferralNetwork';
+import HiringJourney from '../../components/dashboard/HiringJourney';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axiosClient';
 
-interface Referral {
-    id: number;
-    job_title: string;
-    engineer_name: string;
-    status: string;
-    created_at: string;
+function getGreeting() {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
 }
 
 export default function CandidateDashboard() {
     const { profile } = useAuth();
-    const [referrals, setReferrals] = useState<Referral[]>([]);
+    const [nudge, setNudge] = useState<'apply' | 'referral' | null>(null);
+
+    const cp = profile?.candidate_profile ?? {};
+    const profileIncomplete = !cp.skills?.length || !cp.resume_url;
 
     useEffect(() => {
-        api.get('/api/referrals').then(r => setReferrals(r.data)).catch(() => { });
-    }, []);
+        if (profileIncomplete) { setNudge(null); return; }
+        Promise.allSettled([
+            api.get('/api/jobs/my-applications'),
+            api.get('/api/referrals'),
+        ]).then(([apps, refs]) => {
+            if (apps.status === 'fulfilled' && apps.value.data.length === 0) setNudge('apply');
+            else if (refs.status === 'fulfilled' && refs.value.data.length === 0) setNudge('referral');
+            else setNudge(null);
+        });
+    }, [profile]);
 
-    const counts = {
-        pending: referrals.filter(r => r.status === 'pending').length,
-        accepted: referrals.filter(r => r.status === 'accepted').length,
-        hired: referrals.filter(r => r.status === 'hired').length,
-    };
+    const firstName = profile?.name?.split(' ')[0] ?? '';
 
     return (
-        <div style={styles.page}>
-            <Navbar />
-            <div style={styles.content}>
-                <div style={styles.header}>
+        <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, var(--color-surface) 0%, var(--color-sky) 60%, var(--color-periwinkle) 100%)' }}>
+            <DashNavbar />
+
+            <main style={{ width: '100%', padding: '28px 32px 48px', display: 'flex', flexDirection: 'column', gap: 20, boxSizing: 'border-box' }}>
+
+                {/* Row 1 — Greeting */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
                     <div>
-                        <h1 style={styles.heading}>Welcome back, {profile?.name ?? 'Candidate'}</h1>
-                        <p style={styles.sub}>Track your referrals and discover new opportunities.</p>
+                        <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                            {getGreeting()}{' · '}
+                            <span style={{ color: 'var(--color-brand-dark)' }}>
+                                {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            </span>
+                        </p>
+                        <h1 style={{ margin: '4px 0 0', fontSize: 26, fontWeight: 800, color: 'var(--color-text-primary)', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.2 }}>
+                            {firstName ? `${firstName}'s Job Search Hub` : 'Your Job Search Hub'}
+                        </h1>
                     </div>
-                    <Link to="/candidate/jobs" style={styles.ctaBtn}>Browse Jobs</Link>
+                    <Link to="/candidate/jobs" className="btn-hero" style={{ padding: '10px 22px', fontSize: 13 }}>
+                        Browse Jobs ↗
+                    </Link>
                 </div>
 
-                <div style={styles.statsRow}>
-                    {[
-                        { label: 'Pending', value: counts.pending, color: '#f59e0b' },
-                        { label: 'Accepted', value: counts.accepted, color: '#10b981' },
-                        { label: 'Hired', value: counts.hired, color: '#3b82f6' },
-                    ].map(s => (
-                        <div key={s.label} style={styles.statCard}>
-                            <div style={{ ...styles.statValue, color: s.color }}>{s.value}</div>
-                            <div style={styles.statLabel}>{s.label}</div>
-                        </div>
-                    ))}
-                </div>
+                {/* Row 2 — Single smart banner: profile OR nudge, never both */}
+                {profileIncomplete
+                    ? <ProfileBanner profile={profile} />
+                    : nudge && <NudgeBanner type={nudge} />
+                }
 
-                <div style={styles.section}>
-                    <div style={styles.sectionHeader}>
-                        <h2 style={styles.sectionTitle}>Recent Referrals</h2>
-                        <Link to="/candidate/referrals" style={styles.viewAll}>View all</Link>
+                {/* Row 3 — Stats */}
+                <StatsRow />
+
+                {/* Row 4 — Quick actions */}
+                <QuickActions />
+
+                {/* Row 5 — Main grid: left content + right sidebar */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20, alignItems: 'start' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
+                        <RecentApplications />
+                        <AnalyticsPanel />
+                        <JobMatchFeed />
                     </div>
-                    {referrals.length === 0
-                        ? <p style={styles.empty}>No referrals yet. Browse jobs to get started.</p>
-                        : referrals.slice(0, 5).map(r => (
-                            <ReferralCard
-                                key={r.id}
-                                candidateName={profile?.name ?? 'You'}
-                                jobTitle={r.job_title}
-                                status={r.status}
-                                date={new Date(r.created_at).toLocaleDateString()}
-                            />
-                        ))
-                    }
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        <HiringJourney />
+                        <ResumeScoreCard />
+                        <GoalTracker />
+                        <ReferralNetwork />
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     );
 }
 
-const styles: Record<string, React.CSSProperties> = {
-    page: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'system-ui, sans-serif' },
-    content: { maxWidth: 900, margin: '0 auto', padding: '32px 24px' },
-    header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 },
-    heading: { margin: '0 0 4px', fontSize: 24, fontWeight: 700, color: '#111' },
-    sub: { margin: 0, color: '#6b7280', fontSize: 14 },
-    ctaBtn: {
-        padding: '10px 20px',
-        background: '#3b82f6',
-        color: '#fff',
-        borderRadius: 8,
-        textDecoration: 'none',
-        fontSize: 14,
-        fontWeight: 600,
+const NUDGES = {
+    apply: {
+        icon: '🚀', color: '#d97706',
+        title: "You haven't applied to any jobs yet",
+        desc: 'Start applying to get noticed by engineers and increase your chances of a referral.',
+        cta: 'Browse Jobs', href: '/candidate/jobs',
     },
-    statsRow: { display: 'flex', gap: 16, marginBottom: 32 },
-    statCard: {
-        flex: 1,
-        background: '#fff',
-        borderRadius: 10,
-        padding: '20px 24px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.07)',
+    referral: {
+        icon: '🤝', color: '#7c3aed',
+        title: 'Request your first referral',
+        desc: 'A referral increases your interview chances by 5x. Ask an engineer now.',
+        cta: 'Request Referral', href: '/candidate/referrals',
     },
-    statValue: { fontSize: 32, fontWeight: 700, marginBottom: 4 },
-    statLabel: { fontSize: 13, color: '#6b7280', fontWeight: 500 },
-    section: { background: '#fff', borderRadius: 10, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.07)' },
-    sectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-    sectionTitle: { margin: 0, fontSize: 16, fontWeight: 700, color: '#111' },
-    viewAll: { fontSize: 13, color: '#3b82f6', textDecoration: 'none', fontWeight: 500 },
-    empty: { color: '#9ca3af', fontSize: 14, textAlign: 'center', padding: '24px 0' },
 };
+
+function NudgeBanner({ type }: { type: 'apply' | 'referral' }) {
+    const n = NUDGES[type];
+    return (
+        <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
+            padding: '14px 20px', borderRadius: 14, flexWrap: 'wrap',
+            background: 'var(--color-surface)', border: '1px solid var(--color-border-light)',
+            borderLeft: `4px solid ${n.color}`, boxShadow: '0 2px 12px rgba(20,154,160,0.07)',
+        }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontSize: 24 }}>{n.icon}</span>
+                <div>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)', fontFamily: 'Space Grotesk, sans-serif' }}>{n.title}</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-text-muted)' }}>{n.desc}</p>
+                </div>
+            </div>
+            <Link to={n.href} style={{
+                padding: '8px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
+                background: n.color, color: '#fff', textDecoration: 'none', flexShrink: 0,
+            }}>{n.cta} →</Link>
+        </div>
+    );
+}
