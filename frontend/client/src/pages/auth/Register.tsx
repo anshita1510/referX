@@ -1,16 +1,16 @@
 import { useState, FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail } from 'lucide-react';
 
 export default function Register() {
     const { register, error, clearError } = useAuth();
-    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [showPw, setShowPw] = useState(false);
     const [busy, setBusy] = useState(false);
+    const [sent, setSent] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -18,8 +18,34 @@ export default function Register() {
         setBusy(true);
         const result = await register(email, password, 'candidate', { name });
         setBusy(false);
-        if (result.success) navigate('/candidate/profile-setup');
+        if (result.success) setSent(true);
     };
+
+    if (sent) {
+        return (
+            <div className="auth-page items-center justify-center px-4 py-12">
+                <div className="auth-card w-full max-w-md p-10 text-center">
+                    <div className="flex justify-center mb-6">
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center"
+                            style={{ background: 'var(--color-sky)' }}>
+                            <Mail size={32} style={{ color: 'var(--color-brand)' }} />
+                        </div>
+                    </div>
+                    <h2 className="font-heading text-2xl font-extrabold mb-3" style={{ color: 'var(--color-text-primary)' }}>
+                        Check your inbox
+                    </h2>
+                    <p className="text-sm mb-2" style={{ color: 'var(--color-text-muted)' }}>
+                        We sent a verification link to
+                    </p>
+                    <p className="font-semibold mb-6" style={{ color: 'var(--color-text-primary)' }}>{email}</p>
+                    <p className="text-sm mb-8" style={{ color: 'var(--color-text-muted)' }}>
+                        Click the link in the email to verify your account, then you can sign in.
+                    </p>
+                    <Link to="/login" className="auth-btn inline-block">Go to Login</Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="auth-page items-center justify-center px-4 py-12">

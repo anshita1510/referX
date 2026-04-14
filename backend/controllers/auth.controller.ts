@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { prisma } from '../config/prisma.js';
+import { sendVerificationEmail } from '../services/email.service.js';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES = '7d';
@@ -20,8 +22,10 @@ export const register = async (req: Request, res: Response) => {
         if (existing) return res.status(409).json({ error: 'An account with this email already exists.' });
 
         const password_hash = await bcrypt.hash(password, 12);
+        const verification_token = crypto.randomBytes(32).toString('hex');
+
         const user = await (prisma.user.create as any)({
-            data: { email, password_hash, role, name },
+            data: { email, password_hash, role, name, verification_token },
         });
 
         if (role === 'candidate') {
@@ -30,12 +34,52 @@ export const register = async (req: Request, res: Response) => {
             await prisma.engineerProfile.create({ data: { user_id: user.id } });
         }
 
-        const token = makeToken(user);
-        res.status(201).json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });
+        await sendVerificationEmail(email, verification_token);
+
+        res.status(201).json({ message: 'Registration successful. Please check your email to verify your account.' });
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
 };
+
+export const verifyEmail = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.params;
+        const user = await (prisma.user.findFirst as any)({ where: { verification_token: token } });
+
+        if (!user) {
+            return res.status(400).send(verifyPage('Invalid or expired verification link.', false));
+        }
+
+        await (prisma.user.update as any)({
+            where: { id: user.id },
+            data: { email_verified: true, verification_token: null },
+        });
+
+        return res.send(verifyPage('Your email has been verified successfully!', true));
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+function verifyPage(message: string, success: boolean) {
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const color = success ? '#22c55e' : '#ef4444';
+    const icon = success ? '✅' : '❌';
+    return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"/><title>Email Verification – ReferX</title>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#f8fafc;}
+.card{max-width:420px;width:100%;padding:40px;border-radius:16px;border:1px solid #e2e8f0;text-align:center;background:#fff;}
+h2{color:#1e293b;margin-bottom:8px;}p{color:#64748b;margin-bottom:28px;}
+a{display:inline-block;background:#6366f1;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;}</style>
+</head>
+<body><div class="card">
+  <div style="font-size:48px;margin-bottom:16px;">${icon}</div>
+  <h2 style="color:${color}">${message}</h2>
+  ${success ? `<p>You can now sign in to your account.</p><a href="${clientUrl}/login">Go to Login</a>` : `<p>Please try registering again or contact support.</p>`}
+</div></body></html>`;
+}
 
 export const login = async (req: Request, res: Response) => {
     try {
@@ -48,6 +92,10 @@ export const login = async (req: Request, res: Response) => {
 
         const valid = await bcrypt.compare(password, user.password_hash);
         if (!valid) return res.status(401).json({ error: 'Incorrect password.' });
+
+        if (!user.email_verified) {
+            return res.status(403).json({ error: 'Please verify your email before signing in. Check your inbox for the verification link.' });
+        }
 
         const token = makeToken(user);
         res.json({ token, user: { id: user.id, email: user.email, name: user.name, role: user.role } });

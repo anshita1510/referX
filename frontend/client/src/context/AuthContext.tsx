@@ -78,11 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const register = async (email: string, password: string, role: string, extra: { name: string }) => {
         setError(null);
         try {
-            const { data } = await api.post('/api/auth/register', { email, password, role, name: extra.name });
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            setUser(data.user);
-            setProfile(data.user);
+            await api.post('/api/auth/register', { email, password, role, name: extra.name });
             return { success: true };
         } catch (err: any) {
             const msg = err.response?.data?.error ?? 'Something went wrong.';
