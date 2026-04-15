@@ -12,6 +12,8 @@ import Documents from './pages/candidate/Documents';
 import EngineerDashboard from './pages/engineer/Dashboard';
 import CandidateList from './pages/engineer/CandidateList';
 import Earnings from './pages/engineer/Earnings';
+import EngineerReferrals from './pages/engineer/Referrals';
+import EngineerInterviews from './pages/engineer/Interviews';
 import CompanyDashboard from './pages/company/Dashboard';
 import PostJob from './pages/company/PostJob';
 
@@ -36,6 +38,8 @@ export default function App() {
       <Route path="/engineer/dashboard" element={<RoleRoute roles={['engineer']}><EngineerDashboard /></RoleRoute>} />
       <Route path="/engineer/candidates" element={<RoleRoute roles={['engineer']}><CandidateList /></RoleRoute>} />
       <Route path="/engineer/earnings" element={<RoleRoute roles={['engineer']}><Earnings /></RoleRoute>} />
+      <Route path="/engineer/referrals" element={<RoleRoute roles={['engineer']}><EngineerReferrals /></RoleRoute>} />
+      <Route path="/engineer/interviews" element={<RoleRoute roles={['engineer']}><EngineerInterviews /></RoleRoute>} />
       <Route path="/company/dashboard" element={<RoleRoute roles={['company']}><CompanyDashboard /></RoleRoute>} />
       <Route path="/company/post-job" element={<RoleRoute roles={['company']}><PostJob /></RoleRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />

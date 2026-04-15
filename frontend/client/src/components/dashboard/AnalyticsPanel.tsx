@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosClient';
-import { useRefresh } from '../../context/RefreshContext';
 
 interface Application { status: string; applied_at: string }
 

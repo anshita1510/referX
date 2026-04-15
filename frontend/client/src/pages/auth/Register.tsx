@@ -1,10 +1,43 @@
 import { useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 
+type Role = 'candidate' | 'engineer';
+
+const ROLE_CONFIG: Record<Role, {
+    icon: string; label: string; desc: string;
+    panelTitle: string; panelSub: string;
+    steps: { step: string; label: string }[];
+}> = {
+    candidate: {
+        icon: '🎯', label: 'Registering as Candidate', desc: 'Looking for a job via referrals',
+        panelTitle: 'Your first job starts with a real referral.',
+        panelSub: 'Create your account, complete your profile, and get referred by engineers at top companies.',
+        steps: [
+            { step: '1', label: 'Create your account' },
+            { step: '2', label: 'Complete your profile' },
+            { step: '3', label: 'Get referred & hired' },
+        ],
+    },
+    engineer: {
+        icon: '⚡', label: 'Registering as Engineer', desc: 'Refer candidates & earn rewards',
+        panelTitle: 'Turn your network into income.',
+        panelSub: 'Refer candidates, conduct mock interviews, and get paid for every successful hire you enable.',
+        steps: [
+            { step: '1', label: 'Create your engineer account' },
+            { step: '2', label: 'Add your company & skills' },
+            { step: '3', label: 'Start referring & earning' },
+        ],
+    },
+};
+
 export default function Register() {
     const { register, error, clearError } = useAuth();
+    const [searchParams] = useSearchParams();
+    const initialRole = (searchParams.get('role') as Role) === 'engineer' ? 'engineer' : 'candidate';
+
+    const [role, setRole] = useState<Role>(initialRole);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
@@ -12,11 +45,13 @@ export default function Register() {
     const [busy, setBusy] = useState(false);
     const [sent, setSent] = useState(false);
 
+    const rc = ROLE_CONFIG[role];
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         clearError();
         setBusy(true);
-        const result = await register(email, password, 'candidate', { name });
+        const result = await register(email, password, role, { name });
         setBusy(false);
         if (result.success) setSent(true);
     };
@@ -58,18 +93,14 @@ export default function Register() {
                 </div>
                 <div>
                     <h2 className="font-heading text-3xl font-extrabold text-white mb-4 leading-snug">
-                        Your first job starts with a real referral.
+                        {rc.panelTitle}
                     </h2>
                     <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>
-                        Create your account, complete your profile, and get referred by engineers at top companies.
+                        {rc.panelSub}
                     </p>
                 </div>
                 <div className="flex flex-col gap-3">
-                    {[
-                        { step: '1', label: 'Create your account' },
-                        { step: '2', label: 'Complete your profile' },
-                        { step: '3', label: 'Get referred & hired' },
-                    ].map(s => (
+                    {rc.steps.map(s => (
                         <div key={s.step} className="flex items-center gap-3 px-4 py-3 rounded-xl"
                             style={{ background: 'rgba(255,255,255,0.12)' }}>
                             <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -96,13 +127,34 @@ export default function Register() {
                     Step 1 of 2 — Basic info
                 </p>
 
+                {/* Role toggle */}
+                <div className="flex gap-2 mb-6 p-1 rounded-xl" style={{ background: 'var(--color-sky)', border: '1px solid var(--color-border)' }}>
+                    {(['candidate', 'engineer'] as Role[]).map(r => (
+                        <button
+                            key={r}
+                            type="button"
+                            onClick={() => { setRole(r); clearError(); }}
+                            style={{
+                                flex: 1, padding: '8px 0', borderRadius: 10, border: 'none', cursor: 'pointer',
+                                background: role === r ? 'var(--color-surface)' : 'transparent',
+                                color: role === r ? 'var(--color-brand-dark)' : 'var(--color-text-muted)',
+                                fontSize: 13, fontWeight: role === r ? 700 : 500,
+                                boxShadow: role === r ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+                                transition: 'all 0.15s',
+                                fontFamily: 'Space Grotesk, sans-serif',
+                            }}>
+                            {r === 'candidate' ? '🎯 Candidate' : '⚡ Engineer'}
+                        </button>
+                    ))}
+                </div>
+
                 {/* Role badge */}
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl mb-6"
-                    style={{ background: 'var(--color-sky)', border: '1px solid var(--color-border)' }}>
-                    <span className="text-lg">🎯</span>
+                    style={{ background: role === 'engineer' ? '#fef9ec' : 'var(--color-sky)', border: '1px solid var(--color-border)' }}>
+                    <span className="text-lg">{rc.icon}</span>
                     <div>
-                        <div className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>Registering as Candidate</div>
-                        <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>Looking for a job via referrals</div>
+                        <div className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{rc.label}</div>
+                        <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{rc.desc}</div>
                     </div>
                 </div>
 

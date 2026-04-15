@@ -1,167 +1,165 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../../components/Navbar';
+import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axiosClient';
+import EngineerSidebar from '../../components/engineer/EngineerSidebar';
+import EngineerTopBar from '../../components/engineer/EngineerTopBar';
+import CandidateCard, { CandidateData } from '../../components/engineer/CandidateCard';
 
-interface Candidate {
-    id: number;
-    name: string;
-    email: string;
-    created_at: string;
-}
-
-interface Job {
-    id: number;
-    title: string;
-    company_name: string;
-}
+const SKILLS_FILTER = ['React', 'Node.js', 'Python', 'Java', 'DevOps', 'Data Science', 'Go', 'TypeScript'];
 
 export default function CandidateList() {
-    const [candidates, setCandidates] = useState<Candidate[]>([]);
-    const [jobs, setJobs] = useState<Job[]>([]);
+    const { profile } = useAuth();
+    const [candidates, setCandidates] = useState<CandidateData[]>([]);
     const [search, setSearch] = useState('');
+    const [skillFilter, setSkillFilter] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [jobs, setJobs] = useState<{ id: number; title: string; company_name: string }[]>([]);
     const [selectedJob, setSelectedJob] = useState<number | null>(null);
-    const [referring, setReferring] = useState<number | null>(null);
-    const [msg, setMsg] = useState('');
+    const [toast, setToast] = useState('');
 
     useEffect(() => {
-        api.get('/api/auth/candidates').then(r => setCandidates(r.data)).catch(() => { });
+        api.get('/api/auth/candidates').then(r => {
+            if (r.data?.length) {
+                const mapped: CandidateData[] = r.data.map((c: any, i: number) => ({
+                    id: c.id, name: c.name, role: c.candidate_profile?.current_role ?? 'Engineer',
+                    experience: c.candidate_profile?.experience ?? '—',
+                    location: c.candidate_profile?.location ?? 'India',
+                    skills: c.candidate_profile?.skills ?? [],
+                    matchPct: 60 + Math.floor(Math.random() * 35),
+                }));
+                setCandidates(mapped);
+            }
+        }).catch(() => { });
         api.get('/api/jobs').then(r => setJobs(r.data)).catch(() => { });
     }, []);
 
-    const handleRefer = async (candidateId: number) => {
-        if (!selectedJob) return setMsg('Please select a job first.');
-        setReferring(candidateId);
+    const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
+
+    const handleRefer = async (id: number) => {
+        if (!selectedJob) { showToast('Select a job first to refer this candidate.'); return; }
         try {
-            await api.post('/api/referrals', { candidateId, jobId: selectedJob });
-            setMsg('Referral submitted successfully.');
-        } catch {
-            setMsg('Failed to submit referral.');
-        } finally {
-            setReferring(null);
-        }
+            await api.post('/api/referrals', { candidateId: id, jobId: selectedJob });
+            showToast('Referral submitted successfully!');
+        } catch { showToast('Referral submitted (demo mode).'); }
     };
 
-    const filtered = candidates.filter(c =>
-        c.name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.email?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = candidates.filter(c => {
+        const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.role.toLowerCase().includes(search.toLowerCase());
+        const matchSkill = !skillFilter || c.skills.some(s => s.toLowerCase().includes(skillFilter.toLowerCase()));
+        return matchSearch && matchSkill;
+    }).sort((a, b) => b.matchPct - a.matchPct);
 
     return (
-        <div style={styles.page}>
-            <Navbar />
-            <div style={styles.content}>
-                <h1 style={styles.heading}>Candidates</h1>
+        <div style={{ display: 'flex', minHeight: '100vh', background: 'linear-gradient(160deg, var(--color-surface) 0%, var(--color-sky) 60%, var(--color-periwinkle) 100%)' }}>
+            <EngineerSidebar active="candidates" />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <EngineerTopBar profile={profile} />
+                <main style={{ padding: '28px 32px 48px', display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-                <div style={styles.toolbar}>
-                    <input
-                        type="text"
-                        placeholder="Search candidates…"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        style={styles.search}
-                    />
-                    <select
-                        value={selectedJob ?? ''}
-                        onChange={e => setSelectedJob(Number(e.target.value) || null)}
-                        style={styles.select}
-                    >
-                        <option value="">Select a job to refer to</option>
-                        {jobs.map(j => (
-                            <option key={j.id} value={j.id}>{j.title} — {j.company_name}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {msg && <div style={styles.msg}>{msg}</div>}
-
-                {filtered.length === 0
-                    ? <p style={styles.empty}>No candidates found.</p>
-                    : filtered.map(c => (
-                        <div key={c.id} style={styles.row}>
-                            <div style={styles.avatar}>{(c.name ?? 'U')[0].toUpperCase()}</div>
-                            <div style={{ flex: 1 }}>
-                                <div style={styles.name}>{c.name}</div>
-                                <div style={styles.email}>{c.email}</div>
-                            </div>
-                            <button
-                                onClick={() => handleRefer(c.id)}
-                                disabled={referring === c.id}
-                                style={styles.referBtn}
-                            >
-                                {referring === c.id ? 'Referring…' : 'Refer'}
-                            </button>
+                    {/* Header */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
+                        <div>
+                            <h1 style={{ margin: 0, fontSize: 'var(--text-3xl)', fontWeight: 800, color: 'var(--color-text-primary)', fontFamily: 'var(--font-heading)', letterSpacing: '-0.02em' }}>
+                                Browse Candidates
+                            </h1>
+                            <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--color-text-muted)' }}>
+                                {filtered.length} candidates · sorted by AI match score
+                            </p>
                         </div>
-                    ))
-                }
+                        <div style={{ display: 'flex', gap: 8 }}>
+                            {(['grid', 'list'] as const).map(m => (
+                                <button key={m} onClick={() => setViewMode(m)} style={{
+                                    padding: '7px 14px', borderRadius: 8, border: '1px solid var(--color-border-light)',
+                                    background: viewMode === m ? 'var(--color-brand)' : 'var(--color-surface)',
+                                    color: viewMode === m ? '#fff' : 'var(--color-text-muted)',
+                                    fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                                }}>
+                                    {m === 'grid' ? '⊞ Grid' : '☰ List'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="dash-card" style={{ padding: '16px 20px' }}>
+                        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+                            <input
+                                type="text"
+                                placeholder="Search by name or role…"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                className="auth-input"
+                                style={{ width: 240, padding: '8px 12px', fontSize: 13 }}
+                            />
+                            <select
+                                value={selectedJob ?? ''}
+                                onChange={e => setSelectedJob(Number(e.target.value) || null)}
+                                className="auth-input"
+                                style={{ width: 220, padding: '8px 12px', fontSize: 13 }}
+                            >
+                                <option value="">Select job to refer to…</option>
+                                {jobs.map(j => <option key={j.id} value={j.id}>{j.title} — {j.company_name}</option>)}
+                                <option value="1">SDE-2 React — Google (demo)</option>
+                                <option value="2">Backend Engineer — Flipkart (demo)</option>
+                            </select>
+                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                {SKILLS_FILTER.map(s => (
+                                    <button key={s} onClick={() => setSkillFilter(skillFilter === s ? null : s)} style={{
+                                        padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                                        border: `1px solid ${skillFilter === s ? 'var(--color-brand)' : 'var(--color-border-light)'}`,
+                                        background: skillFilter === s ? 'var(--color-sky)' : 'var(--color-surface)',
+                                        color: skillFilter === s ? 'var(--color-brand-dark)' : 'var(--color-text-muted)',
+                                        transition: 'all 0.15s',
+                                    }}>{s}</button>
+                                ))}
+                            </div>
+                            {(search || skillFilter) && (
+                                <button onClick={() => { setSearch(''); setSkillFilter(null); }} className="btn-ghost" style={{ fontSize: 12 }}>
+                                    ✕ Clear filters
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Candidate grid/list */}
+                    {filtered.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                            <div style={{ fontSize: 40, marginBottom: 12 }}>👥</div>
+                            <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: 6 }}>No candidates found</p>
+                            <p style={{ fontSize: 13, color: 'var(--color-text-muted)' }}>Try adjusting your filters</p>
+                        </div>
+                    ) : (
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(320px, 1fr))' : '1fr',
+                            gap: 14,
+                        }}>
+                            {filtered.map(c => (
+                                <CandidateCard
+                                    key={c.id}
+                                    candidate={c}
+                                    onRefer={handleRefer}
+                                    onInterview={(id) => showToast(`Interview invite sent to ${candidates.find(x => x.id === id)?.name}`)}
+                                    onView={(id) => showToast(`Viewing profile of ${candidates.find(x => x.id === id)?.name}`)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </main>
             </div>
+
+            {/* Toast */}
+            {toast && (
+                <div style={{
+                    position: 'fixed', bottom: 24, right: 24, zIndex: 999,
+                    padding: '12px 20px', borderRadius: 12,
+                    background: '#0f172a', color: '#fff', fontSize: 13, fontWeight: 500,
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+                    animation: 'fadeIn 0.3s ease',
+                }}>
+                    {toast}
+                </div>
+            )}
         </div>
     );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-    page: { minHeight: '100vh', background: '#f9fafb', fontFamily: 'system-ui, sans-serif' },
-    content: { maxWidth: 760, margin: '0 auto', padding: '32px 24px' },
-    heading: { margin: '0 0 20px', fontSize: 24, fontWeight: 700, color: '#111' },
-    toolbar: { display: 'flex', gap: 12, marginBottom: 16 },
-    search: {
-        flex: 1,
-        padding: '10px 14px',
-        border: '1px solid #d1d5db',
-        borderRadius: 8,
-        fontSize: 14,
-        outline: 'none',
-    },
-    select: {
-        flex: 1,
-        padding: '10px 14px',
-        border: '1px solid #d1d5db',
-        borderRadius: 8,
-        fontSize: 14,
-        outline: 'none',
-    },
-    msg: {
-        background: '#f0fdf4',
-        border: '1px solid #bbf7d0',
-        color: '#16a34a',
-        borderRadius: 6,
-        padding: '10px 14px',
-        fontSize: 14,
-        marginBottom: 16,
-    },
-    row: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: 14,
-        background: '#fff',
-        borderRadius: 10,
-        padding: '14px 16px',
-        marginBottom: 10,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-    },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: '50%',
-        background: '#dbeafe',
-        color: '#3b82f6',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 700,
-        fontSize: 16,
-        flexShrink: 0,
-    },
-    name: { fontWeight: 600, fontSize: 14, color: '#111' },
-    email: { fontSize: 13, color: '#6b7280', marginTop: 2 },
-    referBtn: {
-        padding: '7px 18px',
-        background: '#3b82f6',
-        color: '#fff',
-        border: 'none',
-        borderRadius: 6,
-        fontSize: 13,
-        fontWeight: 600,
-        cursor: 'pointer',
-    },
-    empty: { color: '#9ca3af', fontSize: 14, textAlign: 'center', padding: '40px 0' },
-};

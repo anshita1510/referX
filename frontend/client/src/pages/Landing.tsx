@@ -333,7 +333,7 @@ function EngineerSpotlight() {
                         <p className="text-base leading-relaxed mb-8" style={{ color: 'var(--color-text-muted)' }}>
                             You already know great candidates. ReferX gives you a structured way to refer them, conduct mock interviews, and get rewarded — all without leaving the platform.
                         </p>
-                        <Link to="/register" className="btn-hero inline-flex">Start Earning →</Link>
+                        <Link to="/register?role=engineer" className="btn-hero inline-flex">Start Earning →</Link>
                     </motion.div>
                     <div className="flex-1 grid grid-cols-1 gap-4">
                         {ENGINEER_PERKS.map((p, i) => (
