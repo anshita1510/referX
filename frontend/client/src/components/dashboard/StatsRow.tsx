@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/axiosClient';
+import { useRefresh } from '../../context/RefreshContext';
 
 interface Stats { applications: number; referrals: number; interviews: number; offers: number }
 
 export default function StatsRow() {
+    const { tick } = useRefresh();
     const [stats, setStats] = useState<Stats>({ applications: 0, referrals: 0, interviews: 0, offers: 0 });
 
     useEffect(() => {
@@ -20,7 +22,7 @@ export default function StatsRow() {
                 offers: refData.filter((r: any) => r.status === 'hired').length,
             });
         });
-    }, []);
+    }, [tick]);
 
     const CARDS = [
         { label: 'Applications sent', value: stats.applications, color: 'var(--color-brand)', bg: 'var(--color-sky)', icon: '📤' },
@@ -44,8 +46,8 @@ export default function StatsRow() {
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                            <div style={{ fontSize: 32, fontWeight: 800, color: c.color, fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1 }}>{c.value}</div>
-                            <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 6 }}>{c.label}</div>
+                            <div className="text-stat" style={{ color: c.color }}>{c.value}</div>
+                            <div className="text-meta" style={{ marginTop: 6 }}>{c.label}</div>
                         </div>
                         <div style={{ width: 40, height: 40, borderRadius: 12, background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, border: '1px solid var(--color-border-light)' }}>
                             {c.icon}

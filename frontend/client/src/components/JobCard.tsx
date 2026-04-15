@@ -37,11 +37,14 @@ export default function JobCard({ title, company, location, salary_range, skills
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
                     {onApply && (
-                        <button onClick={onApply} disabled={applied} style={{
-                            padding: '7px 16px', background: applied ? 'var(--color-sky)' : 'var(--color-brand)',
-                            color: applied ? 'var(--color-brand-dark)' : '#fff', border: 'none',
-                            borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: applied ? 'default' : 'pointer',
-                            fontFamily: 'DM Sans, sans-serif',
+                        <button onClick={onApply} style={{
+                            padding: '7px 16px',
+                            background: applied ? '#f0fdf4' : 'var(--color-brand)',
+                            color: applied ? '#16a34a' : '#fff',
+                            border: applied ? '1.5px solid #bbf7d0' : 'none',
+                            borderRadius: 8, fontSize: 13, fontWeight: 600,
+                            cursor: 'pointer', fontFamily: 'var(--font-body)',
+                            transition: 'all 0.15s',
                         }}>{applied ? 'Applied ✓' : 'Apply'}</button>
                     )}
                     {onRequestReferral && (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosClient';
+import { useRefresh } from '../../context/RefreshContext';
 
 interface Application {
     id: number;
@@ -27,21 +28,23 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function RecentApplications() {
+    const { tick } = useRefresh();
     const [apps, setApps] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        setLoading(true);
         api.get('/api/jobs/my-applications')
             .then(r => setApps(r.data.slice(0, 4)))
             .catch(() => { })
             .finally(() => setLoading(false));
-    }, []);
+    }, [tick]);
 
     return (
         <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 16, padding: '20px 22px', boxShadow: '0 2px 12px rgba(20,154,160,0.07)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)', fontFamily: 'Space Grotesk, sans-serif' }}>Recent Applications</h3>
-                <Link to="/candidate/jobs" style={{ fontSize: 12, color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
+                <p className="dash-card-title">Recent Applications</p>
+                <Link to="/candidate/jobs" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
             </div>
 
             {loading && (

@@ -26,7 +26,7 @@ export default function DashNavbar() {
                 {/* Brand */}
                 <Link to="/candidate/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
                     <img src="/logo.png" alt="ReferX" style={{ height: 32, width: 32, borderRadius: '50%', objectFit: 'cover', objectPosition: '50% 35%' }} />
-                    <span style={{ fontSize: 20, fontWeight: 800, fontFamily: 'Space Grotesk, sans-serif', color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
+                    <span style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-heading)', color: 'var(--color-text-primary)', letterSpacing: '-0.5px' }}>
                         Refer<span style={{ color: 'var(--color-brand)' }}>X</span>
                     </span>
                 </Link>
@@ -37,10 +37,12 @@ export default function DashNavbar() {
                         const active = location.pathname === l.href;
                         return (
                             <Link key={l.href} to={l.href} style={{
-                                padding: '6px 14px', borderRadius: 8, fontSize: 13, fontWeight: active ? 600 : 500,
+                                padding: '6px 14px', borderRadius: 8,
+                                fontSize: 'var(--text-base)', fontWeight: active ? 600 : 500,
                                 color: active ? 'var(--color-brand-dark)' : 'var(--color-text-muted)',
                                 background: active ? 'var(--color-sky)' : 'transparent',
                                 textDecoration: 'none', transition: 'all 0.15s', whiteSpace: 'nowrap',
+                                fontFamily: 'var(--font-body)',
                             }}
                                 onMouseEnter={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)'; (e.currentTarget as HTMLElement).style.background = 'var(--color-sky)'; } }}
                                 onMouseLeave={e => { if (!active) { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; (e.currentTarget as HTMLElement).style.background = 'transparent'; } }}

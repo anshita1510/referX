@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../api/axiosClient';
+import { useRefresh } from '../../context/RefreshContext';
 
 interface Application { status: string; applied_at: string }
 
@@ -101,11 +102,14 @@ export default function AnalyticsPanel() {
                     <p style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>Weekly Activity</p>
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 5, height: 80 }}>
                         {weekly.map(w => (
-                            <div key={w.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                            <div key={w.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                                <span style={{ fontSize: 9, fontWeight: 600, color: w.count > 0 ? 'var(--color-brand-dark)' : 'transparent' }}>
+                                    {w.count}
+                                </span>
                                 <div style={{
                                     width: '100%', borderRadius: '4px 4px 0 0',
                                     background: w.count > 0 ? 'var(--color-brand)' : 'var(--color-sky)',
-                                    height: `${(w.count / maxCount) * 68}px`, minHeight: 4,
+                                    height: `${(w.count / maxCount) * 56}px`, minHeight: 4,
                                     transition: 'height 0.6s ease',
                                     border: '1px solid var(--color-border-light)',
                                 }} />

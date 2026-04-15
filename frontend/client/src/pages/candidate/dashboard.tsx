@@ -12,6 +12,7 @@ import GoalTracker from '../../components/dashboard/GoalTracker';
 import ReferralNetwork from '../../components/dashboard/ReferralNetwork';
 import HiringJourney from '../../components/dashboard/HiringJourney';
 import { useAuth } from '../../context/AuthContext';
+import { RefreshProvider } from '../../context/RefreshContext';
 import api from '../../api/axiosClient';
 
 function getGreeting() {
@@ -43,57 +44,53 @@ export default function CandidateDashboard() {
     const firstName = profile?.name?.split(' ')[0] ?? '';
 
     return (
-        <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, var(--color-surface) 0%, var(--color-sky) 60%, var(--color-periwinkle) 100%)' }}>
-            <DashNavbar />
+        <RefreshProvider>
+            <div style={{ minHeight: '100vh', background: 'linear-gradient(160deg, var(--color-surface) 0%, var(--color-sky) 60%, var(--color-periwinkle) 100%)' }}>
+                <DashNavbar />
+                <main style={{ width: '100%', padding: '28px 32px 48px', display: 'flex', flexDirection: 'column', gap: 20, boxSizing: 'border-box' }}>
 
-            <main style={{ width: '100%', padding: '28px 32px 48px', display: 'flex', flexDirection: 'column', gap: 20, boxSizing: 'border-box' }}>
-
-                {/* Row 1 — Greeting */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>
-                    <div>
-                        <p style={{ margin: 0, fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 500 }}>
-                            {getGreeting()}{' · '}
-                            <span style={{ color: 'var(--color-brand-dark)' }}>
-                                {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
-                            </span>
-                        </p>
-                        <h1 style={{ margin: '4px 0 0', fontSize: 26, fontWeight: 800, color: 'var(--color-text-primary)', fontFamily: 'Space Grotesk, sans-serif', lineHeight: 1.2 }}>
-                            {firstName ? `${firstName}'s Job Search Hub` : 'Your Job Search Hub'}
-                        </h1>
+                    {/* Greeting */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+                        <div>
+                            <p className="text-meta">
+                                {getGreeting()} · <span style={{ color: 'var(--color-brand-dark)', fontWeight: 500 }}>
+                                    {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                </span>
+                            </p>
+                            <h1 style={{ margin: '4px 0 0', fontSize: 'var(--text-3xl)', fontWeight: 800, color: 'var(--color-text-primary)', fontFamily: 'var(--font-heading)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+                                {firstName ? `${firstName}'s Job Search Hub` : 'Your Job Search Hub'}
+                            </h1>
+                        </div>
+                        <Link to="/candidate/jobs" className="btn-hero" style={{ padding: '10px 22px', fontSize: 13 }}>
+                            Browse Jobs ↗
+                        </Link>
                     </div>
-                    <Link to="/candidate/jobs" className="btn-hero" style={{ padding: '10px 22px', fontSize: 13 }}>
-                        Browse Jobs ↗
-                    </Link>
-                </div>
 
-                {/* Row 2 — Single smart banner: profile OR nudge, never both */}
-                {profileIncomplete
-                    ? <ProfileBanner profile={profile} />
-                    : nudge && <NudgeBanner type={nudge} />
-                }
+                    {/* Smart banner — profile OR nudge, never both */}
+                    {profileIncomplete
+                        ? <ProfileBanner profile={profile} />
+                        : nudge && <NudgeBanner type={nudge} />
+                    }
 
-                {/* Row 3 — Stats */}
-                <StatsRow />
+                    <StatsRow />
+                    <QuickActions />
 
-                {/* Row 4 — Quick actions */}
-                <QuickActions />
-
-                {/* Row 5 — Main grid: left content + right sidebar */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20, alignItems: 'start' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-                        <RecentApplications />
-                        <AnalyticsPanel />
-                        <JobMatchFeed />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 20, alignItems: 'start' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
+                            <RecentApplications />
+                            <AnalyticsPanel />
+                            <JobMatchFeed />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                            <HiringJourney />
+                            <ResumeScoreCard />
+                            <GoalTracker />
+                            <ReferralNetwork />
+                        </div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <HiringJourney />
-                        <ResumeScoreCard />
-                        <GoalTracker />
-                        <ReferralNetwork />
-                    </div>
-                </div>
-            </main>
-        </div>
+                </main>
+            </div>
+        </RefreshProvider>
     );
 }
 
@@ -124,12 +121,12 @@ function NudgeBanner({ type }: { type: 'apply' | 'referral' }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{ fontSize: 24 }}>{n.icon}</span>
                 <div>
-                    <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: 'var(--color-text-primary)', fontFamily: 'Space Grotesk, sans-serif' }}>{n.title}</p>
-                    <p style={{ margin: '2px 0 0', fontSize: 12, color: 'var(--color-text-muted)' }}>{n.desc}</p>
+                    <p style={{ margin: 0, fontWeight: 700, fontSize: 'var(--text-base)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-heading)' }}>{n.title}</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>{n.desc}</p>
                 </div>
             </div>
             <Link to={n.href} style={{
-                padding: '8px 18px', borderRadius: 9, fontSize: 13, fontWeight: 600,
+                padding: '8px 18px', borderRadius: 9, fontSize: 'var(--text-sm)', fontWeight: 600,
                 background: n.color, color: '#fff', textDecoration: 'none', flexShrink: 0,
             }}>{n.cta} →</Link>
         </div>

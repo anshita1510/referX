@@ -21,10 +21,16 @@ export default function BrowseJobs() {
     const [toast, setToast] = useState<string | null>(null);
 
     useEffect(() => {
-        api.get('/api/jobs')
-            .then(r => setJobs(r.data))
-            .catch(() => { })
-            .finally(() => setLoading(false));
+        Promise.allSettled([
+            api.get('/api/jobs'),
+            api.get('/api/jobs/my-applications'),
+        ]).then(([jobsRes, appsRes]) => {
+            if (jobsRes.status === 'fulfilled') setJobs(jobsRes.value.data);
+            if (appsRes.status === 'fulfilled') {
+                const ids = new Set<number>(appsRes.value.data.map((a: any) => a.job_id));
+                setApplied(ids);
+            }
+        }).finally(() => setLoading(false));
     }, []);
 
     const showToast = (msg: string) => {
@@ -33,12 +39,19 @@ export default function BrowseJobs() {
     };
 
     const handleApply = async (jobId: number, title: string) => {
+        const isApplied = applied.has(jobId);
         try {
-            await api.post(`/api/jobs/${jobId}/apply`);
-            setApplied(prev => new Set(prev).add(jobId));
-            showToast(`Applied to "${title}" successfully!`);
+            if (isApplied) {
+                await api.delete(`/api/jobs/${jobId}/apply`);
+                setApplied(prev => { const s = new Set(prev); s.delete(jobId); return s; });
+                showToast(`Withdrew application for "${title}"`);
+            } else {
+                await api.post(`/api/jobs/${jobId}/apply`);
+                setApplied(prev => new Set(prev).add(jobId));
+                showToast(`Applied to "${title}" successfully!`);
+            }
         } catch (err: any) {
-            showToast(err.response?.data?.error ?? 'Failed to apply.');
+            showToast(err.response?.data?.error ?? 'Something went wrong.');
         }
     };
 

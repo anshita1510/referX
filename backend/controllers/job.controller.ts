@@ -71,6 +71,20 @@ export const applyToJob = async (req: Request, res: Response) => {
     }
 };
 
+export const withdrawApplication = async (req: Request, res: Response) => {
+    try {
+        const candidateId = (req as any).user?.id;
+        const jobId = parseInt(req.params.id);
+        if (isNaN(jobId)) return res.status(400).json({ error: 'Invalid job id' });
+
+        await prisma.application.deleteMany({
+            where: { candidate_id: candidateId, job_id: jobId },
+        });
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+};
 export const createJob = async (req: Request, res: Response) => {
     try {
         const companyId = (req as any).user?.id;
