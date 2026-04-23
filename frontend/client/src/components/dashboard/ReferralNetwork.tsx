@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 
 interface Referral {
@@ -64,7 +64,7 @@ export default function ReferralNetwork() {
                 );
             })}
 
-            <Link to="/candidate/referrals" style={{
+            <Link href="/candidate/referrals" style={{
                 display: 'block', textAlign: 'center', padding: '9px 0', marginTop: 4,
                 border: '1.5px solid var(--color-border)', borderRadius: 10,
                 fontSize: 13, color: 'var(--color-brand-dark)', textDecoration: 'none', fontWeight: 600,

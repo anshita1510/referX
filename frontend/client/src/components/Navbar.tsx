@@ -1,4 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
@@ -22,7 +25,7 @@ const NAV_LINKS: Record<string, { label: string; href: string }[]> = {
 
 export default function Navbar() {
     const { isAuthenticated, role, logout, getDashboardPath, user } = useAuth();
-    const location = useLocation();
+    const pathname = usePathname();
     const links = role ? (NAV_LINKS[role] ?? []) : [];
 
     return (
@@ -32,7 +35,7 @@ export default function Navbar() {
             position: 'sticky', top: 0, zIndex: 100,
             boxShadow: '0 1px 8px rgba(20,154,160,0.07)',
         }}>
-            <Link to={isAuthenticated ? getDashboardPath() : '/'} style={{
+            <Link href={isAuthenticated ? getDashboardPath() : '/'} style={{
                 fontSize: 20, fontWeight: 800, color: 'var(--color-text-primary)',
                 textDecoration: 'none', marginRight: 32, fontFamily: 'Space Grotesk, sans-serif',
             }}>
@@ -42,11 +45,11 @@ export default function Navbar() {
             {isAuthenticated && (
                 <div style={{ display: 'flex', gap: 2, flex: 1, overflowX: 'auto' }}>
                     {links.map(l => (
-                        <Link key={l.href} to={l.href} style={{
+                        <Link key={l.href} href={l.href} style={{
                             padding: '6px 12px', borderRadius: 8, fontSize: 13, fontWeight: 500,
-                            color: location.pathname === l.href ? 'var(--color-brand-dark)' : 'var(--color-text-muted)',
+                            color: pathname === l.href ? 'var(--color-brand-dark)' : 'var(--color-text-muted)',
                             textDecoration: 'none', whiteSpace: 'nowrap',
-                            background: location.pathname === l.href ? 'var(--color-sky)' : 'transparent',
+                            background: pathname === l.href ? 'var(--color-sky)' : 'transparent',
                             transition: 'background 0.15s',
                         }}>
                             {l.label}
@@ -71,8 +74,8 @@ export default function Navbar() {
                     </>
                 ) : (
                     <>
-                        <Link to="/login" style={{ padding: '6px 12px', fontSize: 13, color: 'var(--color-text-muted)', textDecoration: 'none' }}>Sign in</Link>
-                        <Link to="/register" style={{
+                        <Link href="/login" style={{ padding: '6px 12px', fontSize: 13, color: 'var(--color-text-muted)', textDecoration: 'none' }}>Sign in</Link>
+                        <Link href="/register" style={{
                             padding: '7px 16px', background: 'var(--color-brand)', color: '#fff',
                             borderRadius: 8, fontSize: 13, fontWeight: 600, textDecoration: 'none',
                         }}>Register</Link>

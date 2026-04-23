@@ -50,3 +50,36 @@ export async function sendVerificationEmail(toEmail: string, token: string) {
 
     console.log('[email] Sent successfully. MessageId:', info.messageId);
 }
+
+export async function sendPasswordResetOtpEmail(toEmail: string, otpCode: string) {
+    const host = process.env.SMTP_HOST?.trim();
+    const user = process.env.SMTP_USER?.trim();
+    if (!host || !user) {
+        console.warn(
+            `[email] SMTP not configured — OTP for ${toEmail}: ${otpCode} (see backend logs; set SMTP_HOST and SMTP_USER to send email).`,
+        );
+        return;
+    }
+
+    const transporter = createTransporter();
+
+    const info = await transporter.sendMail({
+        from: `"ReferX" <${process.env.SMTP_USER}>`,
+        to: toEmail,
+        subject: 'Your ReferX password reset code',
+        html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;border:1px solid #e5e7eb;border-radius:12px;">
+                <h2 style="color:#1e293b;margin-bottom:8px;">Password reset</h2>
+                <p style="color:#475569;margin-bottom:24px;">
+                    Use this one-time code to continue resetting your password. It expires in 15 minutes.
+                </p>
+                <p style="font-size:32px;letter-spacing:0.3em;font-weight:700;color:#1e293b;margin:24px 0;text-align:center;">${otpCode}</p>
+                <p style="color:#94a3b8;font-size:12px;margin-top:24px;">
+                    If you did not request this, you can ignore this email. Your password will stay the same.
+                </p>
+            </div>
+        `,
+    });
+
+    console.log('[email] Password reset OTP sent. MessageId:', info.messageId);
+}

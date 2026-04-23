@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 
 const STEPS = [
@@ -83,7 +83,7 @@ export default function HiringJourney() {
                                     <div style={{ fontSize: 10, color: 'var(--color-text-soft)', marginTop: 1 }}>{step.sub}</div>
                                 </div>
                                 {active && step.href && (
-                                    <Link to={step.href} style={{ fontSize: 10, color: 'var(--color-brand)', fontWeight: 700, textDecoration: 'none', flexShrink: 0, marginTop: 2 }}>
+                                    <Link href={step.href} style={{ fontSize: 10, color: 'var(--color-brand)', fontWeight: 700, textDecoration: 'none', flexShrink: 0, marginTop: 2 }}>
                                         Do it →
                                     </Link>
                                 )}

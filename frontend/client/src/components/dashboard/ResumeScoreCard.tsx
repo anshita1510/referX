@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 
 interface Check { label: string; done: boolean; points: number; fixHref: string; fixLabel: string }
@@ -89,7 +89,7 @@ export default function ResumeScoreCard() {
                                 {c.done ? `+${c.points}` : `+${c.points} pts`}
                             </span>
                             {!c.done && (
-                                <Link to={c.fixHref} style={{
+                                <Link href={c.fixHref} style={{
                                     fontSize: 10, padding: '2px 8px', borderRadius: 6,
                                     background: 'var(--color-sky)', color: 'var(--color-brand-dark)',
                                     textDecoration: 'none', fontWeight: 700, border: '1px solid var(--color-border)',

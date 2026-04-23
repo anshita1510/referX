@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 function calcCompletion(profile: any): { pct: number; missing: string[] } {
     const checks = [
@@ -54,7 +54,7 @@ export default function ProfileBanner({ profile }: { profile: any }) {
                     </p>
                 )}
             </div>
-            <Link to="/candidate/profile-setup" style={{
+            <Link href="/candidate/profile-setup" style={{
                 padding: '9px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600,
                 background: 'linear-gradient(to right, var(--color-brand-dark), var(--color-teal-light))',
                 color: '#fff', textDecoration: 'none', flexShrink: 0,

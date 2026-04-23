@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 
 function getGreeting() {
@@ -78,7 +78,7 @@ export default function EngineerTopBar({ profile, monthlyEarnings }: { profile: 
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {/* Earnings pill — only shown when data is loaded */}
                 {monthlyEarnings !== undefined && (
-                    <Link to="/engineer/earnings" style={{
+                    <Link href="/engineer/earnings" style={{
                         display: 'flex', alignItems: 'center', gap: 8, padding: '7px 14px',
                         background: 'linear-gradient(to right, var(--color-brand-dark), var(--color-teal-light))',
                         borderRadius: 24, textDecoration: 'none',
@@ -92,7 +92,7 @@ export default function EngineerTopBar({ profile, monthlyEarnings }: { profile: 
                     </Link>
                 )}
 
-                <Link to="/engineer/candidates" className="btn-primary" style={{ padding: '8px 16px', fontSize: 13, borderRadius: 9 }}>
+                <Link href="/engineer/candidates" className="btn-primary" style={{ padding: '8px 16px', fontSize: 13, borderRadius: 9 }}>
                     Browse Candidates ↗
                 </Link>
 

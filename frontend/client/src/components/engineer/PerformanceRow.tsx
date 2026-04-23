@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 interface Props {
     totalEarnings: number;
@@ -32,7 +32,7 @@ export default function PerformanceRow({
                             ₹{totalEarnings.toLocaleString('en-IN')}
                         </div>
                     </div>
-                    <Link to="/engineer/earnings" style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>
+                    <Link href="/engineer/earnings" style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>
                         Details →
                     </Link>
                 </div>

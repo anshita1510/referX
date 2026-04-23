@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 interface Candidate {
     id: number;
@@ -37,7 +37,7 @@ export default function OpportunitiesPanel({ candidates, loading }: Props) {
                         AI-ranked by fit for your company · Refer to earn ₹5,000/hire
                     </p>
                 </div>
-                <Link to="/engineer/candidates" style={{ textDecoration: 'none' }}>
+                <Link href="/engineer/candidates" style={{ textDecoration: 'none' }}>
                     <button style={{
                         padding: '7px 14px', borderRadius: 8, border: 'none', cursor: 'pointer',
                         background: 'linear-gradient(to right, var(--color-brand-dark), var(--color-teal-light))',
@@ -60,7 +60,7 @@ export default function OpportunitiesPanel({ candidates, loading }: Props) {
                     <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 10 }}>
                         No candidates yet — they'll appear here as they sign up
                     </p>
-                    <Link to="/engineer/candidates" style={{ textDecoration: 'none' }}>
+                    <Link href="/engineer/candidates" style={{ textDecoration: 'none' }}>
                         <button style={{
                             padding: '7px 16px', borderRadius: 8, cursor: 'pointer',
                             background: 'var(--color-sky)', color: 'var(--color-brand-dark)',
@@ -107,7 +107,7 @@ export default function OpportunitiesPanel({ candidates, loading }: Props) {
                                 ))}
                             </div>
                             <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
-                                <Link to="/engineer/candidates" style={{ flex: 1, textDecoration: 'none' }}>
+                                <Link href="/engineer/candidates" style={{ flex: 1, textDecoration: 'none' }}>
                                     <button style={{
                                         width: '100%', padding: '5px 0', borderRadius: 7, border: 'none', cursor: 'pointer',
                                         background: 'linear-gradient(to right, var(--color-brand-dark), var(--color-teal-light))',

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 interface Props {
     monthlyEarnings: number;
@@ -38,7 +38,7 @@ export default function EarningsPriorityBar({ monthlyEarnings, totalEarnings, pe
                 {pendingReferrals > 0 && (
                     <>
                         <div style={{ width: 1, height: 28, background: 'var(--color-border-light)' }} />
-                        <Link to="/engineer/referrals" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Link href="/engineer/referrals" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span style={{
                                 width: 20, height: 20, borderRadius: '50%', background: '#fef9ec',
                                 border: '1px solid #fde68a', display: 'flex', alignItems: 'center',
@@ -51,7 +51,7 @@ export default function EarningsPriorityBar({ monthlyEarnings, totalEarnings, pe
                 {upcomingInterviews > 0 && (
                     <>
                         <div style={{ width: 1, height: 28, background: 'var(--color-border-light)' }} />
-                        <Link to="/engineer/interviews" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Link href="/engineer/interviews" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span style={{
                                 width: 20, height: 20, borderRadius: '50%', background: '#eff6ff',
                                 border: '1px solid #bfdbfe', display: 'flex', alignItems: 'center',
@@ -64,7 +64,7 @@ export default function EarningsPriorityBar({ monthlyEarnings, totalEarnings, pe
             </div>
 
             {/* Right: primary CTA */}
-            <Link to="/engineer/interviews" style={{ textDecoration: 'none' }}>
+            <Link href="/engineer/interviews" style={{ textDecoration: 'none' }}>
                 <button style={{
                     display: 'flex', alignItems: 'center', gap: 8,
                     padding: '9px 20px', borderRadius: 10, border: 'none', cursor: 'pointer',

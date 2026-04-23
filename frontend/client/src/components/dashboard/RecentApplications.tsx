@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 import { useRefresh } from '../../context/RefreshContext';
 
@@ -44,7 +44,7 @@ export default function RecentApplications() {
         <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border-light)', borderRadius: 16, padding: '20px 22px', boxShadow: '0 2px 12px rgba(20,154,160,0.07)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <p className="dash-card-title">Recent Applications</p>
-                <Link to="/candidate/jobs" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
+                <Link href="/candidate/jobs" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
             </div>
 
             {loading && (
@@ -60,7 +60,7 @@ export default function RecentApplications() {
                     <div style={{ fontSize: 36, marginBottom: 10 }}>📋</div>
                     <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: 'var(--color-text-primary)' }}>No applications yet</p>
                     <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--color-text-muted)' }}>Start applying to jobs to track your progress here.</p>
-                    <Link to="/candidate/jobs" style={{ display: 'inline-block', padding: '8px 18px', background: 'var(--color-brand)', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                    <Link href="/candidate/jobs" style={{ display: 'inline-block', padding: '8px 18px', background: 'var(--color-brand)', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
                         Browse Jobs →
                     </Link>
                 </div>

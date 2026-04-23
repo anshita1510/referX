@@ -1,11 +1,12 @@
 {
     "name": "referx-frontend",
     "version": "1.0.0",
-    "type": "module",
+    "private": true,
     "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "preview": "vite preview"
+        "dev": "next dev -p 3000",
+        "build": "next build",
+        "start": "next start -p 3000",
+        "lint": "next lint"
     },
     "dependencies": {
         "@radix-ui/react-accordion": "^1.2.12",
@@ -13,19 +14,20 @@
         "clsx": "^2.1.1",
         "framer-motion": "^12.38.0",
         "lucide-react": "^1.8.0",
+        "next": "^15.1.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
-        "react-router-dom": "^6.23.1",
         "tailwind-merge": "^3.5.0"
     },
     "devDependencies": {
+        "@types/node": "^20.12.12",
         "@types/react": "^18.3.28",
         "@types/react-dom": "^18.3.0",
-        "@vitejs/plugin-react": "^4.3.0",
         "autoprefixer": "^10.4.27",
+        "eslint": "^8.57.0",
+        "eslint-config-next": "^15.1.0",
         "postcss": "^8.5.9",
         "tailwindcss": "^3.4.19",
-        "typescript": "^5.4.5",
-        "vite": "^5.2.11"
+        "typescript": "^5.4.5"
     }
 }

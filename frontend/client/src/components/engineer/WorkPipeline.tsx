@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { ReferralRequest } from './ReferralApprovalCard';
 import { InterviewSlot } from './InterviewScheduler';
 
@@ -49,7 +49,7 @@ function InterviewRow({ iv }: { iv: InterviewSlot }) {
                 {iv.earnings > 0 && (
                     <span style={{ fontSize: 12, fontWeight: 700, color: '#16a34a' }}>+₹{iv.earnings.toLocaleString('en-IN')}</span>
                 )}
-                <Link to="/engineer/interviews" style={{ textDecoration: 'none' }}>
+                <Link href="/engineer/interviews" style={{ textDecoration: 'none' }}>
                     <button style={{
                         padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 700,
                         background: isToday ? 'linear-gradient(to right, #7c3aed, #a78bfa)' : 'var(--color-sky)',
@@ -136,7 +136,7 @@ export default function WorkPipeline({ interviews, referrals, loading, onApprove
                             {upcoming.length > 0 ? `${upcoming.length} session${upcoming.length > 1 ? 's' : ''} scheduled` : 'No sessions yet'}
                         </p>
                     </div>
-                    <Link to="/engineer/interviews" style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>View all →</Link>
+                    <Link href="/engineer/interviews" style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>View all →</Link>
                 </div>
                 {loading ? <Skeleton /> : upcoming.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -144,7 +144,7 @@ export default function WorkPipeline({ interviews, referrals, loading, onApprove
                         <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 10 }}>
                             You have open slots — start earning now
                         </p>
-                        <Link to="/engineer/candidates" style={{ textDecoration: 'none' }}>
+                        <Link href="/engineer/candidates" style={{ textDecoration: 'none' }}>
                             <button style={{
                                 padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
                                 background: 'linear-gradient(to right, #7c3aed, #a78bfa)',
@@ -173,7 +173,7 @@ export default function WorkPipeline({ interviews, referrals, loading, onApprove
                             {pending.length > 0 ? `${pending.length} waiting for your decision` : 'All caught up'}
                         </p>
                     </div>
-                    <Link to="/engineer/referrals" style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>View all →</Link>
+                    <Link href="/engineer/referrals" style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>View all →</Link>
                 </div>
                 {loading ? <Skeleton /> : pending.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '20px 0' }}>
@@ -181,7 +181,7 @@ export default function WorkPipeline({ interviews, referrals, loading, onApprove
                         <p style={{ fontSize: 12, color: 'var(--color-text-muted)', marginBottom: 10 }}>
                             No pending requests — refer a candidate to earn ₹5,000
                         </p>
-                        <Link to="/engineer/candidates" style={{ textDecoration: 'none' }}>
+                        <Link href="/engineer/candidates" style={{ textDecoration: 'none' }}>
                             <button style={{
                                 padding: '7px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
                                 background: 'linear-gradient(to right, var(--color-brand-dark), var(--color-teal-light))',

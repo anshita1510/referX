@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
@@ -53,7 +53,7 @@ export default function EngineerSidebar({ active, monthlyEarnings }: Props) {
                         {group.items.map(item => {
                             const isActive = active === item.id;
                             return (
-                                <Link key={item.id} to={item.href} style={{ textDecoration: 'none' }}>
+                                <Link key={item.id} href={item.href} style={{ textDecoration: 'none' }}>
                                     <div style={{
                                         display: 'flex', alignItems: 'center', gap: 10,
                                         padding: '8px 10px', borderRadius: 8, cursor: 'pointer',

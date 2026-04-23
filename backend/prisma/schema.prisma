@@ -15,6 +15,8 @@ model User {
   avatar_url         String?
   email_verified     Boolean  @default(false)
   verification_token String?  @db.VarChar(255)
+  password_reset_otp_hash   String?   @db.VarChar(255)
+  password_reset_otp_expires DateTime? @db.Timestamptz(6)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
 
   candidate_profile         CandidateProfile?

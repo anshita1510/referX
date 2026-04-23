@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV = [
@@ -63,7 +63,7 @@ export default function Sidebar({ active, onNav, profile }: Props) {
                                 </div>
                             );
                             return item.href
-                                ? <Link key={item.id} to={item.href} style={{ textDecoration: 'none' }}>{inner}</Link>
+                                ? <Link key={item.id} href={item.href} style={{ textDecoration: 'none' }}>{inner}</Link>
                                 : inner;
                         })}
                     </div>

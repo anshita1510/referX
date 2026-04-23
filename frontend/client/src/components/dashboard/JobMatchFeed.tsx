@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 import { useAuth } from '../../context/AuthContext';
 
@@ -98,7 +98,7 @@ export default function JobMatchFeed() {
                     <p className="dash-card-title">Recommended for You</p>
                     <p className="dash-card-sub">Matched based on your skills</p>
                 </div>
-                <Link to="/candidate/jobs" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
+                <Link href="/candidate/jobs" style={{ fontSize: 'var(--text-sm)', color: 'var(--color-brand)', textDecoration: 'none', fontWeight: 600 }}>View all →</Link>
             </div>
 
             {jobs.length === 0 && (
@@ -147,7 +147,7 @@ export default function JobMatchFeed() {
                                                 ? (isApplied ? 'Withdrawing…' : 'Applying…')
                                                 : isApplied ? 'Applied ✓' : 'Apply'}
                                         </button>
-                                        <Link to="/candidate/referrals" style={{
+                                        <Link href="/candidate/referrals" style={{
                                             padding: '6px 14px', background: 'var(--color-surface)',
                                             color: 'var(--color-brand-dark)', border: '1.5px solid var(--color-brand)',
                                             borderRadius: 8, fontSize: 11, fontWeight: 600, textDecoration: 'none',

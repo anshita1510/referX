@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 interface ActionCardProps {
     icon: string;
@@ -14,7 +14,7 @@ interface ActionCardProps {
 
 function ActionCard({ icon, label, sub, earn, href, primary, color, bg, border }: ActionCardProps) {
     return (
-        <Link to={href} style={{ textDecoration: 'none' }}>
+        <Link href={href} style={{ textDecoration: 'none' }}>
             <div style={{
                 padding: primary ? '20px 22px' : '16px 18px',
                 borderRadius: 14,

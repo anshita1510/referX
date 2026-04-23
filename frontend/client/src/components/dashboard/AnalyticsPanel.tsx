@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 
 interface Application { status: string; applied_at: string }
@@ -31,7 +31,7 @@ export default function AnalyticsPanel() {
                 <div style={{ fontSize: 40, marginBottom: 12 }}>📊</div>
                 <h3 style={{ margin: '0 0 6px', fontSize: 15, fontWeight: 700, color: 'var(--color-text-primary)', fontFamily: 'Space Grotesk, sans-serif' }}>No analytics yet</h3>
                 <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--color-text-muted)' }}>Apply to jobs to start tracking your application funnel and activity.</p>
-                <Link to="/candidate/jobs" style={{ display: 'inline-block', padding: '9px 20px', background: 'var(--color-brand)', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                <Link href="/candidate/jobs" style={{ display: 'inline-block', padding: '9px 20px', background: 'var(--color-brand)', color: '#fff', borderRadius: 9, fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
                     Browse Jobs →
                 </Link>
             </div>

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '../api/axiosClient';
 
 interface AuthUser {
@@ -51,8 +52,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setUser(parsed);
             // Fetch full profile in background
             api.get('/api/auth/me')
-                .then(r => setProfile(r.data))
-                .catch(() => { })
+                .then((r) => setProfile(r.data))
+                .catch(() => {
+                    setUser(null);
+                    setProfile(null);
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                })
                 .finally(() => setLoading(false));
         } else {
             setLoading(false);
@@ -126,17 +132,28 @@ export function useAuth() {
 }
 
 export function ProtectedRoute({ children, fallback = null }: { children: any; fallback?: any }) {
+    const router = useRouter();
     const { isAuthenticated, loading } = useAuth();
     if (loading) return fallback ?? <AuthSpinner />;
-    if (!isAuthenticated) { window.location.replace('/login'); return null; }
+    if (!isAuthenticated) {
+        router.replace('/login');
+        return null;
+    }
     return children;
 }
 
 export function RoleRoute({ children, roles, fallback = null }: { children: any; roles: string[]; fallback?: any }) {
+    const router = useRouter();
     const { isAuthenticated, loading, role, getDashboardPath } = useAuth();
     if (loading) return fallback ?? <AuthSpinner />;
-    if (!isAuthenticated) { window.location.replace('/login'); return null; }
-    if (!roles.includes(role!)) { window.location.replace(getDashboardPath()); return null; }
+    if (!isAuthenticated) {
+        router.replace('/login');
+        return null;
+    }
+    if (!roles.includes(role!)) {
+        router.replace(getDashboardPath());
+        return null;
+    }
     return children;
 }
 

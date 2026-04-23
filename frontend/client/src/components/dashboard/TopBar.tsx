@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import api from '../../api/axiosClient';
 
 interface Notif { id: number; icon: string; text: string; time: string; unread: boolean }
@@ -77,7 +77,7 @@ export default function TopBar({ profile }: { profile: any }) {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <Link to="/candidate/jobs" className="btn-hero" style={{ padding: '8px 18px', fontSize: 13 }}>
+                <Link href="/candidate/jobs" className="btn-hero" style={{ padding: '8px 18px', fontSize: 13 }}>
                     Browse jobs ↗
                 </Link>
 

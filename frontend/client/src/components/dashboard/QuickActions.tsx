@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 const ACTIONS = [
     {
@@ -23,7 +23,7 @@ export default function QuickActions() {
     return (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, width: '100%' }}>
             {ACTIONS.map(a => (
-                <Link key={a.label} to={a.href} style={{ textDecoration: 'none' }}>
+                <Link key={a.label} href={a.href} style={{ textDecoration: 'none' }}>
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: 12,
                         padding: '14px 16px', borderRadius: 14,
