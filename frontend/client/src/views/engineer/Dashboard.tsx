@@ -12,6 +12,20 @@ import AIInsightsPanel from '../../components/engineer/AIInsightsPanel';
 import { ReferralRequest } from '../../components/engineer/ReferralApprovalCard';
 import { InterviewSlot } from '../../components/engineer/InterviewScheduler';
 
+interface OnboardingSummary {
+    profile_completion_pct: number;
+    trust_score: number;
+    badges: string[];
+    verified: boolean;
+    admin_verification_status: string;
+    candidates_available: number;
+    pending_referral_requests: number;
+    earnings_summary: number;
+    referral_success_rate: number;
+    successful_hires: number;
+    can_refer: boolean;
+}
+
 interface Stats {
     totalEarnings: number;
     monthlyEarnings: number;
@@ -45,6 +59,7 @@ export default function EngineerDashboard() {
         monthlyData: [],
     });
     const [loading, setLoading] = useState(true);
+    const [summary, setSummary] = useState<OnboardingSummary | null>(null);
 
     const firstName = profile?.name?.split(' ')[0] ?? 'Engineer';
 
@@ -54,7 +69,9 @@ export default function EngineerDashboard() {
             api.get('/api/interviews'),
             api.get('/api/payments'),
             api.get('/api/auth/candidates'),
-        ]).then(([refsRes, ivsRes, paymentsRes, candidatesRes]) => {
+            api.get('/api/engineers/dashboard-summary'),
+        ]).then(([refsRes, ivsRes, paymentsRes, candidatesRes, summaryRes]) => {
+            if (summaryRes.status === 'fulfilled') setSummary(summaryRes.value.data);
 
             // ── Referrals ──────────────────────────────────────
             const rawRefs = refsRes.status === 'fulfilled' ? refsRes.value.data : [];
@@ -87,7 +104,7 @@ export default function EngineerDashboard() {
                 id: c.id,
                 name: c.name,
                 role: c.candidate_profile?.current_role ?? c.candidate_profile?.experience_level ?? 'Engineer',
-                skills: c.candidate_profile?.skills ?? [],
+                skills: c.candidate_profile?.skills ?? c.candidate_profile?.skills_preview ?? [],
                 matchPct: Math.min(95, 60 + ((c.id * 7 + i * 13) % 36)),
             })).sort((a: CandidateMatch, b: CandidateMatch) => b.matchPct - a.matchPct));
 
@@ -140,6 +157,25 @@ export default function EngineerDashboard() {
                 {/* Zone A: Top bar with greeting + notifications */}
                 <EngineerTopBar profile={profile} monthlyEarnings={loading ? undefined : stats.monthlyEarnings} />
 
+                {summary && !summary.can_refer && (
+                    <div style={{
+                        margin: '0 24px 0',
+                        padding: '12px 16px',
+                        borderRadius: 12,
+                        border: '1px solid #fde68a',
+                        background: '#fffbeb',
+                        fontSize: 13,
+                        color: '#92400e',
+                    }}>
+                        {summary.admin_verification_status === 'pending'
+                            ? 'Your engineer profile is pending admin approval. Referrals and full candidate profiles unlock after verification.'
+                            : 'Complete onboarding and get verified to refer candidates and unlock full candidate profiles.'}
+                        {summary.admin_verification_status === 'rejected' ? ' You were asked to resubmit — open onboarding to update your details.' : ''}
+                        {' '}
+                        <a href="/engineer/onboarding" style={{ fontWeight: 700, color: 'var(--color-brand-dark)' }}>Open onboarding</a>
+                    </div>
+                )}
+
                 {/* Zone A: Priority earnings bar */}
                 {!loading && (
                     <EarningsPriorityBar
@@ -169,6 +205,40 @@ export default function EngineerDashboard() {
                                 {firstName}'s Engineer Hub
                             </h1>
                         </div>
+
+                        {summary && summary.badges?.length > 0 && (
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                                <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 600 }}>Badges</span>
+                                {summary.badges.map((b) => (
+                                    <span key={b} style={{
+                                        fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 999,
+                                        background: 'var(--color-sky)', border: '1px solid var(--color-border)', color: 'var(--color-brand-dark)',
+                                    }}>{b.replace(/_/g, ' ')}</span>
+                                ))}
+                            </div>
+                        )}
+
+                        {summary && (
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                                gap: 12,
+                            }}>
+                                {[
+                                    { label: 'Profile completion', value: `${summary.profile_completion_pct}%` },
+                                    { label: 'Trust score', value: String(summary.trust_score) },
+                                    { label: 'Candidates', value: String(summary.candidates_available) },
+                                    { label: 'Pending referrals', value: String(summary.pending_referral_requests) },
+                                    { label: 'Earnings (paid)', value: `₹${summary.earnings_summary.toLocaleString('en-IN')}` },
+                                    { label: 'Referral success', value: `${summary.referral_success_rate}%` },
+                                ].map((c) => (
+                                    <div key={c.label} className="dash-card" style={{ padding: '12px 14px' }}>
+                                        <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{c.label}</div>
+                                        <div style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-heading)', color: 'var(--color-text-primary)' }}>{c.value}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Row 1: Action Zone */}
                         <ActionZone />

@@ -11,6 +11,8 @@ import referralRoutes from '../routes/referral.routes.js';
 import interviewRoutes from '../routes/interview.routes.js';
 import paymentRoutes from '../routes/payment.routes.js';
 import documentRoutes from '../routes/document.routes.js';
+import engineerRoutes from '../routes/engineer.routes.js';
+import adminRoutes from '../routes/admin.routes.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/api/referrals', referralRoutes);
 app.use('/api/interviews', interviewRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/engineers', engineerRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use(errorHandler);

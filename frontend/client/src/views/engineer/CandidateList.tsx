@@ -9,6 +9,7 @@ const SKILLS_FILTER = ['React', 'Node.js', 'Python', 'Java', 'DevOps', 'Data Sci
 
 export default function CandidateList() {
     const { profile } = useAuth();
+    const canRefer = !!(profile as any)?.engineer_profile?.verified && (profile as any)?.engineer_profile?.admin_verification_status === 'approved';
     const [candidates, setCandidates] = useState<CandidateData[]>([]);
     const [search, setSearch] = useState('');
     const [skillFilter, setSkillFilter] = useState<string | null>(null);
@@ -21,10 +22,12 @@ export default function CandidateList() {
         api.get('/api/auth/candidates').then(r => {
             if (r.data?.length) {
                 const mapped: CandidateData[] = r.data.map((c: any, i: number) => ({
-                    id: c.id, name: c.name, role: c.candidate_profile?.current_role ?? 'Engineer',
-                    experience: c.candidate_profile?.experience ?? '—',
+                    id: c.id,
+                    name: c.name,
+                    role: c.candidate_profile?.current_role ?? c.candidate_profile?.experience_level ?? 'Engineer',
+                    experience: c.candidate_profile?.experience ?? c.candidate_profile?.experience_level ?? '—',
                     location: c.candidate_profile?.location ?? 'India',
-                    skills: c.candidate_profile?.skills ?? [],
+                    skills: c.candidate_profile?.skills ?? c.candidate_profile?.skills_preview ?? [],
                     matchPct: 60 + Math.floor(Math.random() * 35),
                 }));
                 setCandidates(mapped);
@@ -55,6 +58,20 @@ export default function CandidateList() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 <EngineerTopBar profile={profile} />
                 <main style={{ padding: '28px 32px 48px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+                    {!canRefer && (
+                        <div style={{
+                            padding: '12px 16px',
+                            borderRadius: 12,
+                            border: '1px solid #fde68a',
+                            background: '#fffbeb',
+                            fontSize: 13,
+                            color: '#92400e',
+                        }}>
+                            Limited candidate view until you are a verified engineer. Complete onboarding and wait for admin approval to refer and see full profiles.{' '}
+                            <a href="/engineer/onboarding" style={{ fontWeight: 700, color: 'var(--color-brand-dark)' }}>Onboarding</a>
+                        </div>
+                    )}
 
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12 }}>

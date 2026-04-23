@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../config/prisma.js';
+import { engineerCanConductInterviews } from '../lib/engineer-access.js';
+import { computeBadges } from '../services/engineer-badges.service.js';
 
 export const getInterviews = async (req: Request, res: Response) => {
     try {
@@ -24,6 +26,14 @@ export const bookInterview = async (req: Request, res: Response) => {
     try {
         const candidateId = (req as any).user?.id;
         const { engineerId, scheduledAt, notes } = req.body;
+        const engineerProfile = await prisma.engineerProfile.findUnique({
+            where: { user_id: Number(engineerId) },
+        });
+        if (!engineerCanConductInterviews(engineerProfile)) {
+            return res.status(403).json({
+                error: 'This engineer is not accepting mock interviews yet (onboarding or verification incomplete).',
+            });
+        }
         const interview = await prisma.interview.create({
             data: {
                 candidate_id: candidateId as any,
@@ -40,11 +50,31 @@ export const bookInterview = async (req: Request, res: Response) => {
 
 export const updateInterviewStatus = async (req: Request, res: Response) => {
     try {
+        const engineerId = (req as any).user?.id as number;
         const { status, feedback } = req.body;
+        const existing = await prisma.interview.findFirst({
+            where: { id: Number(req.params.id), engineer_id: engineerId },
+            include: { engineer: { include: { engineer_profile: true } } },
+        });
+        if (!existing) return res.status(404).json({ error: 'Interview not found' });
+
         const interview = await prisma.interview.update({
-            where: { id: req.params.id as any },
+            where: { id: existing.id },
             data: { status, feedback: feedback ?? null },
         });
+
+        const completed = status === 'completed' || status === 'done';
+        const wasCompleted = existing.status === 'completed' || existing.status === 'done';
+        if (completed && !wasCompleted && existing.engineer?.engineer_profile) {
+            const ep = existing.engineer.engineer_profile;
+            const interviews_completed_count = (ep.interviews_completed_count ?? 0) + 1;
+            const badges = computeBadges({ ...ep, interviews_completed_count } as any);
+            await prisma.engineerProfile.update({
+                where: { user_id: engineerId },
+                data: { interviews_completed_count, badges },
+            });
+        }
+
         res.json(interview);
     } catch (err: any) {
         res.status(500).json({ error: err.message });

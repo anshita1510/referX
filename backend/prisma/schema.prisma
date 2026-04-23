@@ -17,6 +17,8 @@ model User {
   verification_token String?  @db.VarChar(255)
   password_reset_otp_hash   String?   @db.VarChar(255)
   password_reset_otp_expires DateTime? @db.Timestamptz(6)
+  phone              String?  @unique @db.VarChar(32)
+  phone_verified     Boolean  @default(false)
   created_at         DateTime @default(now()) @db.Timestamptz(6)
 
   candidate_profile         CandidateProfile?
@@ -30,6 +32,7 @@ model User {
   documents                 Document[]
   interviews_as_candidate   Interview[] @relation("CandidateInterviews")
   interviews_as_engineer    Interview[] @relation("EngineerInterviews")
+  otp_challenges            OtpChallenge[]
 
   @@map("users")
 }
@@ -58,15 +61,62 @@ model EngineerProfile {
   company          String?  @db.VarChar(255)
   designation      String?  @db.VarChar(255)
   experience_years Int?     @default(0)
-  linkedin         String?  @db.VarChar(255)
+  experience_band  String?  @db.VarChar(20)
+  linkedin         String?  @db.VarChar(512)
   skills           String[]
   verified         Boolean  @default(false)
   bio              String?
+  location         String?  @db.VarChar(255)
+  company_email              String?  @db.VarChar(255)
+  company_email_verified     Boolean  @default(false)
+  proof_document_url         String?
+  can_refer_in_company       Boolean  @default(false)
+  referral_companies         String[] @default([])
+  max_referrals_per_month    Int?
+  can_mock_interviews        Boolean  @default(false)
+  interview_types            String[] @default([])
+  interview_experience_notes String?
+  hours_per_week             Int?
+  preferred_time_slots       Json?
+  payment_method             String?  @db.VarChar(32)
+  payment_details_encrypted  String?
+  terms_accepted_at          DateTime? @db.Timestamptz(6)
+  referral_policy_accepted_at DateTime? @db.Timestamptz(6)
+  onboarding_step            Int      @default(0)
+  onboarding_wizard_completed Boolean @default(true)
+  onboarding_draft           Json?
+  admin_verification_status  String   @default("not_submitted") @db.VarChar(32)
+  submitted_for_review_at    DateTime? @db.Timestamptz(6)
+  trust_score                Int      @default(0)
+  badges                     String[] @default([])
+  successful_hires_count     Int      @default(0)
+  interviews_completed_count Int      @default(0)
+  primary_email_otp_verified Boolean @default(false)
   updated_at       DateTime @default(now()) @db.Timestamptz(6)
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("engineer_profiles")
+}
+
+/// Short-lived OTP for phone, company email, or account email confirmation during onboarding.
+model OtpChallenge {
+  id         Int      @id @default(autoincrement())
+  user_id    Int?
+  channel    String   @db.VarChar(16)
+  target     String   @db.VarChar(255)
+  purpose    String   @db.VarChar(64)
+  code_hash  String   @db.VarChar(255)
+  expires_at DateTime @db.Timestamptz(6)
+  attempts   Int      @default(0)
+  consumed   Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+
+  user User? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([target, purpose, consumed])
+  @@index([user_id, purpose, consumed])
+  @@map("otp_challenges")
 }
 
 model Job {

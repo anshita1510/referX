@@ -26,7 +26,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: "5000"
-      DATABASE_URL: postgresql://referx:password@db:5432/referx?schema=public
+      DATABASE_URL: postgresql://referx:password@db:5432/referx
       CLIENT_URL: http://localhost:3000
       API_URL: http://localhost:5000
     env_file:

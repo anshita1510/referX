@@ -72,7 +72,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             setUser(data.user);
-            setProfile(data.user);
+            try {
+                const me = await api.get('/api/auth/me');
+                setProfile(me.data);
+            } catch {
+                setProfile(data.user);
+            }
             return { success: true };
         } catch (err: any) {
             const msg = err.response?.data?.error ?? 'Something went wrong.';

@@ -11,10 +11,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
     ],
-    "/forgot-password/page": [
+    "/register/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/forgot-password/page.js"
+      "static/chunks/app/register/page.js"
     ],
     "/login/page": [
       "static/chunks/webpack.js",
@@ -26,20 +26,20 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/candidate/dashboard/page": [
+    "/engineer/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/candidate/dashboard/page.js"
-    ],
-    "/register/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/register/page.js"
+      "static/chunks/app/engineer/layout.js"
     ],
     "/engineer/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/engineer/dashboard/page.js"
+    ],
+    "/engineer/onboarding/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/engineer/onboarding/page.js"
     ]
   }
 }

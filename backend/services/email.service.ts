@@ -83,3 +83,32 @@ export async function sendPasswordResetOtpEmail(toEmail: string, otpCode: string
 
     console.log('[email] Password reset OTP sent. MessageId:', info.messageId);
 }
+
+export async function sendOnboardingOtpEmail(toEmail: string, otpCode: string, subject: string) {
+    const host = process.env.SMTP_HOST?.trim();
+    const user = process.env.SMTP_USER?.trim();
+    if (!host || !user) {
+        console.warn(`[email] SMTP not configured — onboarding OTP for ${toEmail}: ${otpCode}`);
+        return;
+    }
+
+    const transporter = createTransporter();
+    const info = await transporter.sendMail({
+        from: `"ReferX" <${process.env.SMTP_USER}>`,
+        to: toEmail,
+        subject,
+        html: `
+            <div style="font-family:sans-serif;max-width:480px;margin:auto;padding:32px;border:1px solid #e5e7eb;border-radius:12px;">
+                <h2 style="color:#1e293b;margin-bottom:8px;">Your verification code</h2>
+                <p style="color:#475569;margin-bottom:24px;">
+                    Use this one-time code to continue engineer onboarding. It expires in 10 minutes.
+                </p>
+                <p style="font-size:32px;letter-spacing:0.3em;font-weight:700;color:#1e293b;margin:24px 0;text-align:center;">${otpCode}</p>
+                <p style="color:#94a3b8;font-size:12px;margin-top:24px;">
+                    If you did not request this, you can ignore this email.
+                </p>
+            </div>
+        `,
+    });
+    console.log('[email] Onboarding OTP sent. MessageId:', info.messageId);
+}

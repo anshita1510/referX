@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../config/prisma.js';
 import { sendVerificationEmail, sendPasswordResetOtpEmail } from '../services/email.service.js';
+import { engineerLimitedCandidateView } from '../lib/engineer-access.js';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES = '7d';
@@ -41,7 +42,13 @@ export const register = async (req: Request, res: Response) => {
         if (role === 'candidate') {
             await prisma.candidateProfile.create({ data: { user_id: user.id } });
         } else if (role === 'engineer') {
-            await prisma.engineerProfile.create({ data: { user_id: user.id } });
+            await prisma.engineerProfile.create({
+                data: {
+                    user_id: user.id,
+                    onboarding_wizard_completed: false,
+                    admin_verification_status: 'not_submitted',
+                },
+            });
         }
 
         await sendVerificationEmail(email, verification_token);
@@ -233,14 +240,43 @@ export const getMe = async (req: Request, res: Response) => {
     }
 };
 
-export const getCandidates = async (_req: Request, res: Response) => {
+export const getCandidates = async (req: Request, res: Response) => {
     try {
+        const role = (req as any).user?.role;
+        const engineerId = (req as any).user?.id as number | undefined;
+
         const candidates = await prisma.user.findMany({
             where: { role: 'candidate' },
             include: { candidate_profile: true },
             orderBy: { created_at: 'desc' },
         }) as any[];
-        res.json(candidates.map(({ password_hash: _, ...u }: any) => u));
+
+        let limited = false;
+        if (role === 'engineer' && engineerId != null) {
+            const ep = await prisma.engineerProfile.findUnique({ where: { user_id: engineerId } });
+            limited = engineerLimitedCandidateView(ep);
+        }
+
+        const sanitized = candidates.map(({ password_hash: _, ...u }: any) => {
+            if (!limited) return u;
+            const cp = u.candidate_profile;
+            const skills = (cp?.skills as string[] | undefined) ?? [];
+            return {
+                id: u.id,
+                name: u.name,
+                role: u.role,
+                candidate_profile: cp
+                    ? {
+                          experience_level: cp.experience_level,
+                          location: cp.location,
+                          skills_preview: skills.slice(0, 3),
+                          skills_total: skills.length,
+                      }
+                    : null,
+            };
+        });
+
+        res.json(sanitized);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }

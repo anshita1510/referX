@@ -35,6 +35,19 @@ async function main(): Promise<void> {
         { email: 'hr@phonepe.com', name: 'PhonePe HR' },
     ];
 
+    await prisma.user.upsert({
+        where: { email: 'admin@referx.com' },
+        update: {},
+        create: {
+            email: 'admin@referx.com',
+            password_hash: pw('password123'),
+            name: 'ReferX Admin',
+            role: 'admin',
+            email_verified: true,
+        } as any,
+    });
+    console.log('✅  Admin      (admin@referx.com)');
+
     const companies: CreatedUser[] = await Promise.all(
         companyDefs.map((c) =>
             prisma.user.upsert({
@@ -75,8 +88,23 @@ async function main(): Promise<void> {
                         create: {
                             company: e.company, designation: e.designation,
                             experience_years: e.exp,
-                            linkedin: `https://linkedin.com/in/${e.name.toLowerCase().replace(' ', '')}`,
+                            experience_band: e.exp >= 5 ? '5+' : e.exp >= 3 ? '3-5' : '1-3',
+                            linkedin: `https://linkedin.com/in/${e.name.toLowerCase().replace(/\s+/g, '')}`,
                             skills: e.skills, verified: true, bio: e.bio,
+                            location: 'India',
+                            onboarding_wizard_completed: true,
+                            admin_verification_status: 'approved',
+                            primary_email_otp_verified: true,
+                            company_email: `eng.${e.email}`,
+                            company_email_verified: true,
+                            can_refer_in_company: true,
+                            max_referrals_per_month: 10,
+                            can_mock_interviews: true,
+                            interview_types: ['Coding', 'System Design'],
+                            hours_per_week: 8,
+                            preferred_time_slots: [{ day: 'Saturday', start: '10:00', end: '14:00' }],
+                            terms_accepted_at: new Date(),
+                            referral_policy_accepted_at: new Date(),
                         },
                     },
                 } as any,
