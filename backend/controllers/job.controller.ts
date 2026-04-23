@@ -1,17 +1,14 @@
 import { Request, Response } from 'express';
-import { query } from '../config/db.js';
+import { prisma } from '../config/prisma.js';
 
 export const getJobs = async (_req: Request, res: Response) => {
     try {
-        const result = await query(
-            `SELECT j.*, u.name AS company_name
-       FROM jobs j
-       LEFT JOIN users u ON u.firebase_uid = j.company_id
-       WHERE j.status = 'active'
-       ORDER BY j.posted_at DESC`,
-            []
-        );
-        res.json(result.rows);
+        const jobs = await prisma.job.findMany({
+            where: { status: 'active' },
+            include: { company: { select: { name: true } } },
+            orderBy: { posted_at: 'desc' },
+        });
+        res.json(jobs);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
@@ -19,30 +16,87 @@ export const getJobs = async (_req: Request, res: Response) => {
 
 export const getJobById = async (req: Request, res: Response) => {
     try {
-        const result = await query(
-            `SELECT j.*, u.name AS company_name
-       FROM jobs j
-       LEFT JOIN users u ON u.firebase_uid = j.company_id
-       WHERE j.id = $1`,
-            [req.params.id]
-        );
-        if (!result.rows.length) return res.status(404).json({ error: 'Job not found' });
-        res.json(result.rows[0]);
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid job id' });
+        const job = await prisma.job.findUnique({
+            where: { id },
+            include: { company: { select: { name: true } } },
+        });
+        if (!job) return res.status(404).json({ error: 'Job not found' });
+        res.json(job);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
 };
 
+export const getMyApplications = async (req: Request, res: Response) => {
+    try {
+        const candidateId = (req as any).user?.id;
+        const applications = await prisma.application.findMany({
+            where: { candidate_id: candidateId },
+            include: {
+                job: {
+                    include: { company: { select: { name: true } } },
+                },
+            },
+            orderBy: { applied_at: 'desc' },
+        });
+        res.json(applications);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const applyToJob = async (req: Request, res: Response) => {
+    try {
+        const candidateId = (req as any).user?.id;
+        const jobId = parseInt(req.params.id);
+        if (isNaN(jobId)) return res.status(400).json({ error: 'Invalid job id' });
+
+        // Verify the candidate user actually exists
+        const user = await prisma.user.findUnique({ where: { id: candidateId } });
+        if (!user) return res.status(401).json({ error: 'User not found. Please log in again.' });
+
+        const existing = await prisma.application.findUnique({
+            where: { candidate_id_job_id: { candidate_id: candidateId, job_id: jobId } },
+        });
+        if (existing) return res.status(409).json({ error: 'Already applied to this job' });
+
+        const application = await prisma.application.create({
+            data: { candidate_id: candidateId, job_id: jobId, status: 'applied' },
+        });
+        res.status(201).json(application);
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+export const withdrawApplication = async (req: Request, res: Response) => {
+    try {
+        const candidateId = (req as any).user?.id;
+        const jobId = parseInt(req.params.id);
+        if (isNaN(jobId)) return res.status(400).json({ error: 'Invalid job id' });
+
+        await prisma.application.deleteMany({
+            where: { candidate_id: candidateId, job_id: jobId },
+        });
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+};
 export const createJob = async (req: Request, res: Response) => {
     try {
-        const companyId = (req as any).user?.uid;
+        const companyId = (req as any).user?.id;
         const { title, description, location, salary_range, skills_required } = req.body;
-        const result = await query(
-            `INSERT INTO jobs (company_id, title, description, location, salary_range, skills_required)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [companyId, title, description, location, salary_range, skills_required ?? []]
-        );
-        res.status(201).json(result.rows[0]);
+        const job = await prisma.job.create({
+            data: {
+                company_id: companyId,
+                title, description, location, salary_range,
+                skills_required: skills_required ?? [],
+            },
+        });
+        res.status(201).json(job);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
@@ -50,12 +104,11 @@ export const createJob = async (req: Request, res: Response) => {
 
 export const updateJobStatus = async (req: Request, res: Response) => {
     try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) return res.status(400).json({ error: 'Invalid job id' });
         const { status } = req.body;
-        const result = await query(
-            `UPDATE jobs SET status = $1 WHERE id = $2 RETURNING *`,
-            [status, req.params.id]
-        );
-        res.json(result.rows[0]);
+        const job = await prisma.job.update({ where: { id }, data: { status } });
+        res.json(job);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
     }
